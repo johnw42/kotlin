@@ -23,7 +23,7 @@ class A : S {
             Nested.CONST,
             Interface.CONST,
             <!INSTANCE_ACCESS_BEFORE_SUPER_CALL, UNINITIALIZED_VARIABLE!>a<!>,
-            <!INSTANCE_ACCESS_BEFORE_SUPER_CALL!>b<!>()
+            <!INSTANCE_ACCESS_BEFORE_SUPER_CALL, DEBUG_INFO_LEAKING_THIS!>b<!>()
     )
 
     class Nested {
