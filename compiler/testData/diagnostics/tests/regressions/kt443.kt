@@ -10,5 +10,5 @@ class N() : M() {
             <!VAL_REASSIGNMENT!>super.b<!> = super.b + 1
             return super.b + 1
         }
-    override val b: Int = a + 1
+    override val b: Int = <!DEBUG_INFO_LEAKING_THIS!>a<!> + 1
 }

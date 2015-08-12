@@ -23,8 +23,8 @@ class My(val v: Int) {
     }
 
     init {
-        x = 1
-        y = 2
-        u = 3
+        <!DEBUG_INFO_LEAKING_THIS!>x<!> = 1
+        <!DEBUG_INFO_LEAKING_THIS!>y<!> = 2
+        <!DEBUG_INFO_LEAKING_THIS!>u<!> = 3
     }
 }
