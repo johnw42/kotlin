@@ -153,10 +153,11 @@ class GenerationState @JvmOverloads constructor(
     val isInlineEnabled: Boolean = !configuration.get(JVMConfigurationKeys.DISABLE_INLINE, false)
     val useTypeTableInSerializer: Boolean = configuration.get(JVMConfigurationKeys.USE_TYPE_TABLE, false)
     val inheritMultifileParts: Boolean = configuration.get(JVMConfigurationKeys.INHERIT_MULTIFILE_PARTS, false)
+    val isJvm8Target: Boolean = configuration.get(JVMConfigurationKeys.JVM_8_TARGET, false)
 
     val rootContext: CodegenContext<*> = RootContext(this)
 
-    val classFileVersion: Int = Opcodes.V1_6
+    val classFileVersion: Int = if (isJvm8Target) Opcodes.V1_8 else Opcodes.V1_6
 
     init {
         this.interceptedBuilderFactory = builderFactory
