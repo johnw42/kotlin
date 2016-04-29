@@ -73,14 +73,16 @@ public class SpecialFiles {
 
         excludedFiles.add("smap"); // Line numbers
 
-        // TODO: fix import processing
-        excludedFiles.add("useImportedMemberFromCompanion.kt");
-        excludedFiles.add("useImportedMember.kt");
-        excludedFiles.add("importStaticMemberFromObject.kt");
         //TODO: fix KT-12127
         excludedFiles.add("genericProperty.kt");
 
         excludedFiles.add("external"); //native methods
+
+        excludedFiles.add("kt10143.kt"); //native methods
+        excludedFiles.add("internalTopLevelOtherPackage.kt"); // Cannot change package name
+
+        excludedFiles.add("enclosingInfo"); //  Wrong enclosing info after package renaming
+        excludedFiles.add("signature"); //  Wrong signature after package renaming
     }
 
     private SpecialFiles() {
