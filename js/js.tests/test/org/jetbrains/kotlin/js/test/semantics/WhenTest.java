@@ -137,4 +137,8 @@ public final class WhenTest extends AbstractExpressionTest {
     public void testEmpty() throws Exception {
         checkFooBoxIsOk();
     }
+
+    public void testWhenWithReturnSubjectAndOnlyElseClause() throws Exception {
+        checkFooBoxIsOk();
+    }
 }

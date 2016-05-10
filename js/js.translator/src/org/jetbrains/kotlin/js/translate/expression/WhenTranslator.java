@@ -27,7 +27,6 @@ import org.jetbrains.kotlin.js.translate.general.Translation;
 import org.jetbrains.kotlin.js.translate.operation.InOperationTranslator;
 import org.jetbrains.kotlin.js.translate.utils.BindingUtils;
 import org.jetbrains.kotlin.js.translate.utils.JsAstUtils;
-import org.jetbrains.kotlin.js.translate.utils.TranslationUtils;
 import org.jetbrains.kotlin.lexer.KtTokens;
 import org.jetbrains.kotlin.psi.*;
 import org.jetbrains.kotlin.psi.psiUtil.PsiUtilsKt;
@@ -65,6 +64,9 @@ public final class WhenTranslator extends AbstractTranslator {
                 MetadataProperties.setSynthetic(subjectAssignment, true);
                 context.addStatementToCurrentBlock(subjectAssignment);
                 subjectExpression = subjectVar.reference();
+            }
+            else {
+                subjectExpression = null;
             }
             expressionToMatch = subjectExpression;
         }
@@ -180,7 +182,7 @@ public final class WhenTranslator extends AbstractTranslator {
     @NotNull
     private JsExpression translateIsCondition(@NotNull KtWhenConditionIsPattern conditionIsPattern, @NotNull TranslationContext context) {
         JsExpression expressionToMatch = getExpressionToMatch();
-        assert expressionToMatch != null : "An is-check is not allowed in when() without subject.";
+        if (expressionToMatch == null) return JsLiteral.FALSE;
 
         KtTypeReference typeReference = conditionIsPattern.getTypeReference();
         assert typeReference != null : "An is-check must have a type reference.";
