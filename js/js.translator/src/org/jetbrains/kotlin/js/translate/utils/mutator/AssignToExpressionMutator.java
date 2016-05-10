@@ -16,8 +16,10 @@
 
 package org.jetbrains.kotlin.js.translate.utils.mutator;
 
+import com.google.dart.compiler.backend.js.ast.JsBinaryOperation;
 import com.google.dart.compiler.backend.js.ast.JsExpression;
 import com.google.dart.compiler.backend.js.ast.JsNode;
+import com.google.dart.compiler.backend.js.ast.metadata.MetadataProperties;
 import org.jetbrains.annotations.NotNull;
 
 import static org.jetbrains.kotlin.js.translate.utils.JsAstUtils.assignment;
@@ -37,6 +39,8 @@ public final class AssignToExpressionMutator implements Mutator {
         if (!(node instanceof JsExpression)) {
             return node;
         }
-        return assignment(toAssign, (JsExpression) node);
+        JsBinaryOperation result = assignment(toAssign, (JsExpression) node);
+        MetadataProperties.setSynthetic(result, true);
+        return result;
     }
 }
