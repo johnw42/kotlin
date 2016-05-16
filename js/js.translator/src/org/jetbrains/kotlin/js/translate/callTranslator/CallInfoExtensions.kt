@@ -16,7 +16,6 @@
 
 package org.jetbrains.kotlin.js.translate.callTranslator
 
-import com.google.dart.compiler.backend.js.ast.JsEmptyExpression
 import com.google.dart.compiler.backend.js.ast.JsExpression
 import com.google.dart.compiler.backend.js.ast.JsName
 import com.google.dart.compiler.backend.js.ast.metadata.HasMetadata
@@ -72,16 +71,12 @@ fun VariableAccessInfo.getAccessFunctionName(): String {
 }
 
 fun VariableAccessInfo.constructAccessExpression(ref: JsExpression): JsExpression {
-    if (isGetAccess()) {
-        return ref
-    } else {
-        return if (value !is JsEmptyExpression) {
-            (ref as? HasMetadata)?.let { it.sideEffects = false }
-            JsAstUtils.assignment(ref, value!!)
-        }
-        else {
-            context.emptyExpression
-        }
+    return if (isGetAccess()) {
+        ref
+    }
+    else {
+        (ref as? HasMetadata)?.let { it.sideEffects = false }
+        JsAstUtils.assignment(ref, value!!)
     }
 }
 
