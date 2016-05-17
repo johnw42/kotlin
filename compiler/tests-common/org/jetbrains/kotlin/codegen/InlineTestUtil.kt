@@ -177,7 +177,7 @@ object InlineTestUtil {
     }
 
     private fun loadBinaryClass(file: OutputFile): KotlinJvmBinaryClass {
-        val klass = FileBasedKotlinClass.create(file.asByteArray()) {
+        val klass = FileBasedKotlinClass.create(file.asByteArray(), { TODO("External metadata is not supported in this test") }) {
             className, classHeader, innerClasses ->
             object : FileBasedKotlinClass(className, classHeader, innerClasses) {
                 override val location: String

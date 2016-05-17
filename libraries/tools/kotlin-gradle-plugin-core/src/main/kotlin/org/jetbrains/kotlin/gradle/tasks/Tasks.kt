@@ -200,12 +200,15 @@ open class KotlinCompile() : AbstractKotlinCompile<K2JVMCompilerArguments>() {
         args.pluginOptions = pluginOptions.toTypedArray()
         logger.kotlinDebug("args.pluginOptions = ${args.pluginOptions.joinToString(File.pathSeparator)}")
 
+        // TODO: consider copying arguments automatically
+
         args.noStdlib = true
         args.noJdk = kotlinOptions.noJdk
         args.noInline = kotlinOptions.noInline
         args.noOptimize = kotlinOptions.noOptimize
         args.noCallAssertions = kotlinOptions.noCallAssertions
         args.noParamAssertions = kotlinOptions.noParamAssertions
+        args.externalMetadata = kotlinOptions.externalMetadata
         args.moduleName = kotlinOptions.moduleName ?: extraProperties.getOrNull<String>("defaultModuleName")
 
         fun  addFriendPathForTestTask(taskName: String) {

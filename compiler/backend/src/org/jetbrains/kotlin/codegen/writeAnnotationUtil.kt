@@ -16,11 +16,15 @@
 
 package org.jetbrains.kotlin.codegen
 
+import org.jetbrains.kotlin.codegen.state.GenerationState
 import org.jetbrains.kotlin.load.java.JvmAnnotationNames
 import org.jetbrains.kotlin.load.java.JvmBytecodeBinaryVersion
 import org.jetbrains.kotlin.load.kotlin.JvmMetadataVersion
 import org.jetbrains.kotlin.load.kotlin.header.KotlinClassHeader
 import org.jetbrains.org.objectweb.asm.AnnotationVisitor
+import org.jetbrains.org.objectweb.asm.Type
+import java.io.ByteArrayOutputStream
+import java.io.DataOutputStream
 
 fun writeKotlinMetadata(cb: ClassBuilder, kind: KotlinClassHeader.Kind, action: (AnnotationVisitor) -> Unit) {
     val av = cb.newAnnotation(JvmAnnotationNames.METADATA_DESC, true)
@@ -35,4 +39,44 @@ fun writeSyntheticClassMetadata(cb: ClassBuilder) {
     writeKotlinMetadata(cb, KotlinClassHeader.Kind.SYNTHETIC_CLASS) { av ->
         // Do nothing
     }
+}
+
+@JvmOverloads
+fun writeExternalMetadata(
+        state: GenerationState,
+        type: Type,
+        cb: ClassBuilder,
+        kind: KotlinClassHeader.Kind,
+        data: Array<String>,
+        strings: Array<String>,
+        extraString: String = "",
+        extraInt: Int = 0
+) {
+    fun DataOutputStream.writeStringArray(strings: Array<String>) {
+        writeInt(strings.size)
+        strings.forEach { writeUTF(it) }
+    }
+
+    fun DataOutputStream.writeIntArray(ints: IntArray) {
+        writeInt(ints.size)
+        ints.forEach { writeInt(it) }
+    }
+
+    val av = cb.newAnnotation(JvmAnnotationNames.METADATA_DESC, true)
+    av.visit(JvmAnnotationNames.EXTERNAL_FIELD_NAME, true)
+    av.visitEnd()
+
+    val baos = ByteArrayOutputStream()
+    val output = DataOutputStream(baos)
+    output.writeInt(kind.id)
+    output.writeIntArray(JvmMetadataVersion.INSTANCE.toArray())
+    output.writeIntArray(JvmBytecodeBinaryVersion.INSTANCE.toArray())
+    output.writeStringArray(data)
+    output.writeStringArray(strings)
+    output.writeUTF(extraString)
+    output.writeInt(extraInt)
+
+    output.flush()
+
+    state.factory.writeExternalMetadataFile("${type.internalName}.kotlin_metadata", baos.toByteArray())
 }

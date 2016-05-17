@@ -24,6 +24,11 @@ package kotlin
 @Target(AnnotationTarget.CLASS)
 internal annotation class Metadata(
         /**
+         * `true` if the actual metadata is written to a separate file. The name of the file is specified in [xs] or by default is equal
+         * to the name of the class + ".kotlin_metadata". TODO: specify format
+         */
+        val x: Boolean = false,
+        /**
          * A kind of the metadata this annotation encodes. Kotlin compiler recognizes the following kinds (see KotlinClassHeader.Kind):
          *
          * 1 Class

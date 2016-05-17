@@ -24,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.kotlin.codegen.annotation.AnnotatedSimple;
 import org.jetbrains.kotlin.codegen.context.FieldOwnerContext;
 import org.jetbrains.kotlin.codegen.serialization.JvmSerializerExtension;
+import org.jetbrains.kotlin.codegen.serialization.JvmStringTable;
 import org.jetbrains.kotlin.codegen.state.GenerationState;
 import org.jetbrains.kotlin.descriptors.DeclarationDescriptor;
 import org.jetbrains.kotlin.descriptors.SimpleFunctionDescriptor;
@@ -37,6 +38,7 @@ import org.jetbrains.kotlin.psi.*;
 import org.jetbrains.kotlin.resolve.BindingContext;
 import org.jetbrains.kotlin.serialization.DescriptorSerializer;
 import org.jetbrains.kotlin.serialization.ProtoBuf;
+import org.jetbrains.kotlin.serialization.jvm.BitEncoding;
 import org.jetbrains.org.objectweb.asm.AnnotationVisitor;
 import org.jetbrains.org.objectweb.asm.Type;
 
@@ -127,6 +129,13 @@ public class PackagePartCodegen extends MemberCodegen<KtFile> {
         final DescriptorSerializer serializer =
                 DescriptorSerializer.createTopLevel(new JvmSerializerExtension(v.getSerializationBindings(), state));
         final ProtoBuf.Package packageProto = serializer.packagePartProto(members).build();
+
+        if (state.isExternalMetadata()) {
+            String[] data = BitEncoding.encodeBytes(serializer.serialize(packageProto));
+            String[] strings = ArrayUtil.toStringArray(((JvmStringTable) serializer.getStringTable()).getStrings());
+            WriteAnnotationUtilKt.writeExternalMetadata(state, packagePartType, v, KotlinClassHeader.Kind.FILE_FACADE, data, strings);
+            return;
+        }
 
         WriteAnnotationUtilKt.writeKotlinMetadata(v, KotlinClassHeader.Kind.FILE_FACADE, new Function1<AnnotationVisitor, Unit>() {
             @Override

@@ -144,6 +144,20 @@ public class ClassFileFactory implements OutputFileCollection {
         }
     }
 
+    public void writeExternalMetadataFile(@NotNull String fileName, @NotNull final byte[] bytes) {
+        generators.put(fileName, new OutAndSourceFileList(Collections.<File>emptyList() /* TODO? */) {
+            @Override
+            public byte[] asBytes(ClassBuilderFactory factory) {
+                return bytes;
+            }
+
+            @Override
+            public String asText(ClassBuilderFactory factory) {
+                return "<external-metadata>"; // TODO?
+            }
+        });
+    }
+
     @NotNull
     @Override
     public List<OutputFile> asList() {

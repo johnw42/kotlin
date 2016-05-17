@@ -50,6 +50,12 @@ class ReflectKotlinClass private constructor(
         fun create(klass: Class<*>): ReflectKotlinClass? {
             val headerReader = ReadKotlinClassHeaderAnnotationVisitor()
             ReflectClassStructure.loadClassAnnotations(klass, headerReader)
+            if (headerReader.isExternal) {
+                val classId = klass.classId
+                headerReader.readExternalMetadata(classId.relativeClassName) { name ->
+                    klass.classLoader.getResourceAsStream(classId.packageFqName.asString().replace('.', '/') + "/" + name)?.readBytes()
+                }
+            }
             return ReflectKotlinClass(klass, headerReader.createHeader() ?: return null)
         }
     }

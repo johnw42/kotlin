@@ -62,7 +62,9 @@ class VirtualFileKotlinClass private constructor(
                 try {
                     val byteContent = fileContent ?: file.contentsToByteArray(false)
                     if (!byteContent.isEmpty()) {
-                        return@time FileBasedKotlinClass.create(byteContent) {
+                        return@time FileBasedKotlinClass.create(byteContent, { name ->
+                            file.parent.findChild(name)?.contentsToByteArray(false)
+                        }) {
                             name, header, innerClasses ->
                             VirtualFileKotlinClass(file, name, header, innerClasses)
                         }

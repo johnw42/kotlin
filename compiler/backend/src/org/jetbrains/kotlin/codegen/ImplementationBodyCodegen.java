@@ -34,6 +34,7 @@ import org.jetbrains.kotlin.codegen.context.*;
 import org.jetbrains.kotlin.codegen.extensions.ExpressionCodegenExtension;
 import org.jetbrains.kotlin.codegen.inline.InlineCodegenUtil;
 import org.jetbrains.kotlin.codegen.serialization.JvmSerializerExtension;
+import org.jetbrains.kotlin.codegen.serialization.JvmStringTable;
 import org.jetbrains.kotlin.codegen.signature.BothSignatureWriter;
 import org.jetbrains.kotlin.codegen.signature.JvmSignatureWriter;
 import org.jetbrains.kotlin.codegen.state.GenerationState;
@@ -66,6 +67,7 @@ import org.jetbrains.kotlin.resolve.scopes.receivers.ImplicitReceiver;
 import org.jetbrains.kotlin.resolve.scopes.receivers.ReceiverValue;
 import org.jetbrains.kotlin.serialization.DescriptorSerializer;
 import org.jetbrains.kotlin.serialization.ProtoBuf;
+import org.jetbrains.kotlin.serialization.jvm.BitEncoding;
 import org.jetbrains.kotlin.types.KotlinType;
 import org.jetbrains.kotlin.types.checker.KotlinTypeChecker;
 import org.jetbrains.org.objectweb.asm.*;
@@ -251,6 +253,13 @@ public class ImplementationBodyCodegen extends ClassBodyCodegen {
                 DescriptorSerializer.create(descriptor, new JvmSerializerExtension(v.getSerializationBindings(), state));
 
         final ProtoBuf.Class classProto = serializer.classProto(descriptor).build();
+
+        if (state.isExternalMetadata()) {
+            String[] data = BitEncoding.encodeBytes(serializer.serialize(classProto));
+            String[] strings = ArrayUtil.toStringArray(((JvmStringTable) serializer.getStringTable()).getStrings());
+            WriteAnnotationUtilKt.writeExternalMetadata(state, classAsmType, v, KotlinClassHeader.Kind.CLASS, data, strings);
+            return;
+        }
 
         WriteAnnotationUtilKt.writeKotlinMetadata(v, KotlinClassHeader.Kind.CLASS, new Function1<AnnotationVisitor, Unit>() {
             @Override

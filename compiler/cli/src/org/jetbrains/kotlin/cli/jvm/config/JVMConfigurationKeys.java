@@ -54,4 +54,5 @@ public class JVMConfigurationKeys {
     public static final CompilerConfigurationKey<String> MODULE_NAME =
             CompilerConfigurationKey.create("module name");
 
+    public static final CompilerConfigurationKey<Boolean> EXTERNAL_METADATA = CompilerConfigurationKey.create("external metadata");
 }

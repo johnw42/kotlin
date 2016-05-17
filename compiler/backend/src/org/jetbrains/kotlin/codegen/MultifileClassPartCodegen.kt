@@ -19,6 +19,7 @@ package org.jetbrains.kotlin.codegen
 import com.intellij.util.ArrayUtil
 import org.jetbrains.kotlin.codegen.context.MultifileClassPartContext
 import org.jetbrains.kotlin.codegen.serialization.JvmSerializerExtension
+import org.jetbrains.kotlin.codegen.serialization.JvmStringTable
 import org.jetbrains.kotlin.codegen.state.GenerationState
 import org.jetbrains.kotlin.descriptors.DeclarationDescriptor
 import org.jetbrains.kotlin.descriptors.PackageFragmentDescriptor
@@ -33,6 +34,7 @@ import org.jetbrains.kotlin.resolve.BindingContext
 import org.jetbrains.kotlin.resolve.jvm.diagnostics.MultifileClass
 import org.jetbrains.kotlin.resolve.jvm.diagnostics.OtherOrigin
 import org.jetbrains.kotlin.serialization.DescriptorSerializer
+import org.jetbrains.kotlin.serialization.jvm.BitEncoding
 import org.jetbrains.org.objectweb.asm.MethodVisitor
 import org.jetbrains.org.objectweb.asm.Opcodes
 import org.jetbrains.org.objectweb.asm.Type
@@ -168,6 +170,16 @@ class MultifileClassPartCodegen(
 
         val serializer = DescriptorSerializer.createTopLevel(JvmSerializerExtension(v.serializationBindings, state))
         val packageProto = serializer.packagePartProto(members).build()
+
+        if (state.isExternalMetadata) {
+            val data = BitEncoding.encodeBytes(serializer.serialize(packageProto))
+            val strings = ArrayUtil.toStringArray((serializer.stringTable as JvmStringTable).strings)
+            writeExternalMetadata(
+                    state, partType, v, KotlinClassHeader.Kind.MULTIFILE_CLASS_PART, data, strings,
+                    extraString = facadeClassType.internalName, extraInt = (if (shouldGeneratePartHierarchy) INHERITING else DELEGATING).id
+            )
+            return
+        }
 
         writeKotlinMetadata(v, KotlinClassHeader.Kind.MULTIFILE_CLASS_PART) { av ->
             AsmUtil.writeAnnotationData(av, serializer, packageProto)

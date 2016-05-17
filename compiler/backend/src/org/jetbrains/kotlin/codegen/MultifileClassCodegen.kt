@@ -326,6 +326,14 @@ class MultifileClassCodegen(
         if (!state.classBuilderMode.shouldGenerateMetadata()) return
         if (files.any { it.isScript }) return
 
+        if (state.isExternalMetadata) {
+            writeExternalMetadata(
+                    state, facadeClassType, classBuilder, KotlinClassHeader.Kind.MULTIFILE_CLASS, partInternalNamesSorted.toTypedArray(),
+                    arrayOf(), extraInt = (if (shouldGeneratePartHierarchy) INHERITING else DELEGATING).id
+            )
+            return
+        }
+
         writeKotlinMetadata(classBuilder, KotlinClassHeader.Kind.MULTIFILE_CLASS) { av ->
             val arv = av.visitArray(JvmAnnotationNames.METADATA_DATA_FIELD_NAME)
             for (internalName in partInternalNamesSorted) {

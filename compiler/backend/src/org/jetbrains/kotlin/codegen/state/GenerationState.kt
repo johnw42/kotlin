@@ -70,6 +70,7 @@ class GenerationState @JvmOverloads constructor(
         val incrementalCompilationComponents: IncrementalCompilationComponents? = null,
         val progress: Progress = Progress.DEAF,
         private val onIndependentPartCompilationEnd: GenerationStateEventCallback = GenerationStateEventCallback.DO_NOTHING,
+        val isExternalMetadata: Boolean = false,
         dumpBinarySignatureMappingTo: File? = null
 ) {
     abstract class GenerateClassFilter {

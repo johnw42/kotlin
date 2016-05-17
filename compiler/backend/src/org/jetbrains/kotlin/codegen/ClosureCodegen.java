@@ -27,6 +27,7 @@ import org.jetbrains.kotlin.codegen.binding.CalculatedClosure;
 import org.jetbrains.kotlin.codegen.context.ClosureContext;
 import org.jetbrains.kotlin.codegen.inline.InlineCodegenUtil;
 import org.jetbrains.kotlin.codegen.serialization.JvmSerializerExtension;
+import org.jetbrains.kotlin.codegen.serialization.JvmStringTable;
 import org.jetbrains.kotlin.codegen.signature.BothSignatureWriter;
 import org.jetbrains.kotlin.codegen.signature.JvmSignatureWriter;
 import org.jetbrains.kotlin.codegen.state.GenerationState;
@@ -45,6 +46,7 @@ import org.jetbrains.kotlin.resolve.jvm.diagnostics.JvmDeclarationOriginKt;
 import org.jetbrains.kotlin.resolve.scopes.MemberScope;
 import org.jetbrains.kotlin.serialization.DescriptorSerializer;
 import org.jetbrains.kotlin.serialization.ProtoBuf;
+import org.jetbrains.kotlin.serialization.jvm.BitEncoding;
 import org.jetbrains.kotlin.types.KotlinType;
 import org.jetbrains.kotlin.types.expressions.ExpressionTypingUtils;
 import org.jetbrains.kotlin.util.OperatorNameConventions;
@@ -224,6 +226,13 @@ public class ClosureCodegen extends MemberCodegen<KtElement> {
                 DescriptorSerializer.createForLambda(new JvmSerializerExtension(v.getSerializationBindings(), state));
 
         final ProtoBuf.Function functionProto = serializer.functionProto(funDescriptor).build();
+
+        if (state.isExternalMetadata()) {
+            String[] data = BitEncoding.encodeBytes(serializer.serialize(functionProto));
+            String[] strings = ArrayUtil.toStringArray(((JvmStringTable) serializer.getStringTable()).getStrings());
+            WriteAnnotationUtilKt.writeExternalMetadata(state, asmType, v, KotlinClassHeader.Kind.SYNTHETIC_CLASS, data, strings);
+            return;
+        }
 
         WriteAnnotationUtilKt.writeKotlinMetadata(v, KotlinClassHeader.Kind.SYNTHETIC_CLASS, new Function1<AnnotationVisitor, Unit>() {
             @Override

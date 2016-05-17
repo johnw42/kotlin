@@ -281,6 +281,7 @@ open class K2JVMCompiler : CLICompiler<K2JVMCompilerArguments>() {
             configuration.put(JVMConfigurationKeys.DISABLE_OPTIMIZATION, arguments.noOptimize)
             configuration.put(JVMConfigurationKeys.DECLARATIONS_JSON_PATH, arguments.declarationsOutputPath)
             configuration.put(JVMConfigurationKeys.INHERIT_MULTIFILE_PARTS, arguments.inheritMultifileParts)
+            configuration.put(JVMConfigurationKeys.EXTERNAL_METADATA, arguments.externalMetadata)
             configuration.put(CLIConfigurationKeys.ALLOW_KOTLIN_PACKAGE, arguments.allowKotlinPackage)
             configuration.put(CLIConfigurationKeys.REPORT_PERF, arguments.reportPerf)
         }

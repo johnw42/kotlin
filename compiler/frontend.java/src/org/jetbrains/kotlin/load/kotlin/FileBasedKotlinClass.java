@@ -17,6 +17,7 @@
 package org.jetbrains.kotlin.load.kotlin;
 
 import com.intellij.openapi.util.Ref;
+import kotlin.jvm.functions.Function1;
 import kotlin.jvm.functions.Function3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -84,6 +85,7 @@ public abstract class FileBasedKotlinClass implements KotlinJvmBinaryClass {
     @Nullable
     public static <T extends FileBasedKotlinClass> T create(
             @NotNull byte[] fileContents,
+            @NotNull Function1<String, byte[]> getResource,
             @NotNull Function3<ClassId, KotlinClassHeader, InnerClassesInfo, T> factory
     ) {
         final ReadKotlinClassHeaderAnnotationVisitor readHeaderVisitor = new ReadKotlinClassHeaderAnnotationVisitor();
@@ -114,11 +116,16 @@ public abstract class FileBasedKotlinClass implements KotlinJvmBinaryClass {
         String className = classNameRef.get();
         if (className == null) return null;
 
+        ClassId classId = resolveNameByInternalName(className, innerClasses);
+
+        if (readHeaderVisitor.isExternal()) {
+            readHeaderVisitor.readExternalMetadata(classId.getRelativeClassName(), getResource);
+        }
+
         KotlinClassHeader header = readHeaderVisitor.createHeader();
         if (header == null) return null;
 
-        ClassId id = resolveNameByInternalName(className, innerClasses);
-        return factory.invoke(id, header, innerClasses);
+        return factory.invoke(classId, header, innerClasses);
     }
 
     @NotNull

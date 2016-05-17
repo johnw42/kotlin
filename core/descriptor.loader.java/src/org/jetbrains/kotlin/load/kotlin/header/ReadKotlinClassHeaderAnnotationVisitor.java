@@ -16,6 +16,7 @@
 
 package org.jetbrains.kotlin.load.kotlin.header;
 
+import kotlin.jvm.functions.Function1;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.kotlin.descriptors.SourceElement;
@@ -24,7 +25,12 @@ import org.jetbrains.kotlin.load.kotlin.JvmMetadataVersion;
 import org.jetbrains.kotlin.name.ClassId;
 import org.jetbrains.kotlin.name.FqName;
 import org.jetbrains.kotlin.name.Name;
+import org.jetbrains.kotlin.utils.ExceptionUtilsKt;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInput;
+import java.io.DataInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,6 +54,7 @@ public class ReadKotlinClassHeaderAnnotationVisitor implements AnnotationVisitor
         HEADER_KINDS.put(ClassId.topLevel(new FqName("kotlin.jvm.internal.KotlinSyntheticClass")), SYNTHETIC_CLASS);
     }
 
+    private Boolean external = null;
     private JvmMetadataVersion metadataVersion = null;
     private JvmBytecodeBinaryVersion bytecodeVersion = null;
     private String extraString = null;
@@ -86,6 +93,56 @@ public class ReadKotlinClassHeaderAnnotationVisitor implements AnnotationVisitor
         return headerKind == CLASS ||
                headerKind == FILE_FACADE ||
                headerKind == MULTIFILE_CLASS_PART;
+    }
+
+    public boolean isExternal() {
+        return Boolean.TRUE.equals(external);
+    }
+
+    public void readExternalMetadata(@NotNull FqName relativeClassName, @NotNull Function1<String, byte[]> getResource) {
+        String resourceName =
+                extraString != null && !extraString.isEmpty() ? extraString :
+                relativeClassName.asString().replace('.', '$') + ".kotlin_metadata";
+        byte[] bytes = getResource.invoke(resourceName);
+        if (bytes == null) return;
+
+        try {
+            DataInputStream input = new DataInputStream(new ByteArrayInputStream(bytes));
+            try {
+                headerKind = KotlinClassHeader.Kind.getById(input.readInt());
+                metadataVersion = new JvmMetadataVersion(readIntArray(input));
+                bytecodeVersion = new JvmBytecodeBinaryVersion(readIntArray(input));
+                data = readStringArray(input);
+                strings = readStringArray(input);
+                extraString = input.readUTF();
+                extraInt = input.readInt();
+            }
+            finally {
+                //noinspection ThrowFromFinallyBlock
+                input.close();
+            }
+        }
+        catch (IOException e) {
+            throw ExceptionUtilsKt.rethrow(e);
+        }
+    }
+
+    private static int[] readIntArray(@NotNull DataInput input) throws IOException {
+        int length = input.readInt();
+        int[] result = new int[length];
+        for (int i = 0; i < length; i++) {
+            result[i] = input.readInt();
+        }
+        return result;
+    }
+
+    private static String[] readStringArray(@NotNull DataInput input) throws IOException {
+        int length = input.readInt();
+        String[] result = new String[length];
+        for (int i = 0; i < length; i++) {
+            result[i] = input.readUTF();
+        }
+        return result;
     }
 
     @Nullable
@@ -145,6 +202,11 @@ public class ReadKotlinClassHeaderAnnotationVisitor implements AnnotationVisitor
             else if (METADATA_EXTRA_INT_FIELD_NAME.equals(string)) {
                 if (value instanceof Integer) {
                     extraInt = (Integer) value;
+                }
+            }
+            else if (EXTERNAL_FIELD_NAME.equals(string)) {
+                if (value instanceof Boolean) {
+                    external = (Boolean) value;
                 }
             }
         }

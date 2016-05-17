@@ -407,7 +407,9 @@ object KotlinToJVMBytecodeCompiler {
                 outputDirectory,
                 incrementalCompilationComponents,
                 onIndependentPartCompilationEnd = onIndependentPartCompilationEnd,
-                dumpBinarySignatureMappingTo = configuration.get(JVMConfigurationKeys.DECLARATIONS_JSON_PATH)?.let { File(it) })
+                isExternalMetadata = configuration.get(JVMConfigurationKeys.EXTERNAL_METADATA, false),
+                dumpBinarySignatureMappingTo = configuration.get(JVMConfigurationKeys.DECLARATIONS_JSON_PATH)?.let { File(it) }
+        )
         ProgressIndicatorAndCompilationCanceledStatus.checkCanceled()
 
         val generationStart = PerformanceCounter.currentTime()

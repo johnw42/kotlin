@@ -73,6 +73,9 @@ public class K2JVMCompilerArguments extends CommonCompilerArguments {
     @Argument(value = "Xskip-metadata-version-check", description = "Try loading binary incompatible classes, may cause crashes")
     public boolean skipMetadataVersionCheck;
 
+    @Argument(value = "Xexternal-metadata", description = "Write metadata to external (.kotlin_metadata) files, as opposed to annotations on classes")
+    public boolean externalMetadata;
+
     @Argument(value = "Xdump-declarations-to", description = "Path to JSON file to dump Java to Kotlin declaration mappings")
     @ValueDescription("<path>")
     public String declarationsOutputPath;
