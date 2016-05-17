@@ -55,12 +55,11 @@ public final class JsAstUtils {
         assert (jsNode instanceof JsExpression) || (jsNode instanceof JsStatement)
                 : "Unexpected node of type: " + jsNode.getClass().toString();
         if (jsNode instanceof JsExpression) {
-            JsExpression expression = (JsExpression) jsNode;
-            JsExpressionStatement stmt = new JsExpressionStatement(expression);
-            if (decomposeAssignment(expression) == null) {
-                MetadataProperties.setSynthetic(stmt, true);
+            JsExpressionStatement statement = new JsExpressionStatement((JsExpression) jsNode);
+            if (jsNode instanceof JsNullLiteral) {
+                MetadataProperties.setSynthetic(statement, true);
             }
-            return stmt;
+            return statement;
         }
         return (JsStatement) jsNode;
     }
