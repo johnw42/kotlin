@@ -9,7 +9,7 @@ fun box(): String {
     try {
         return "fail: ${A.x.toString()}"
     }
-    catch (e: java.lang.RuntimeException) {
+    catch (e: RuntimeException) {
         return if (e.message == "catch me") "OK" else "fail: ${e.message}"
     }
 }
