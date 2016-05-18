@@ -265,7 +265,8 @@ public final class PatternTranslator extends AbstractTranslator {
         }
     }
 
-    private static EqualityType equalityType(KotlinType type) {
+    @NotNull
+    private static EqualityType equalityType(@NotNull KotlinType type) {
         DeclarationDescriptor descriptor = type.getConstructor().getDeclarationDescriptor();
         if (!(descriptor instanceof ClassDescriptor)) return EqualityType.GENERAL;
 

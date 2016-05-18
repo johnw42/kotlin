@@ -2,6 +2,10 @@ package foo
 
 data class A(val bar: Int)
 
+@native class B
+
+fun makeB(): B = js("new Object();")
+
 fun intAgainstInt(x: Int) = when (x) {
     1 -> "a"
     2 -> "b"
@@ -40,6 +44,12 @@ fun anyAgainstAny(x: Any) = when (x) {
     else -> "*"
 }
 
+fun dynamicAgainstPattern(x: dynamic) = when(x) {
+    1 -> "a"
+    "2" -> "b"
+    else -> "*"
+}
+
 fun box(): String {
     assertEquals("a", intAgainstInt(1))
     assertEquals("b", intAgainstInt(2))
@@ -66,6 +76,12 @@ fun box(): String {
     assertEquals("a", anyAgainstAny(A(1)))
     assertEquals("b", anyAgainstAny(1))
     assertEquals("*", anyAgainstAny(listOf(1)))
+
+    assertEquals("a", dynamicAgainstPattern(1))
+    assertEquals("a", dynamicAgainstPattern(js("1")))
+    assertEquals("b", dynamicAgainstPattern("2"))
+    assertEquals("b", dynamicAgainstPattern(js("'2'")))
+    assertEquals("*", dynamicAgainstPattern(js("{}")))
 
     return "OK"
 }
