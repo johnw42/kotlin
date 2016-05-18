@@ -25,8 +25,8 @@ import org.jetbrains.kotlin.js.translate.context.TranslationContext;
 import org.jetbrains.kotlin.js.translate.utils.JsAstUtils;
 import org.jetbrains.kotlin.psi.KtClassOrObject;
 import org.jetbrains.kotlin.psi.KtParameter;
-import org.jetbrains.kotlin.psi.psiUtil.PsiUtilsKt;
 import org.jetbrains.kotlin.resolve.BindingContext;
+import org.jetbrains.kotlin.resolve.BindingContextUtils;
 import org.jetbrains.kotlin.resolve.descriptorUtil.DescriptorUtilsKt;
 
 import java.util.ArrayList;
@@ -56,7 +56,7 @@ class JsDataClassGenerator extends DataClassMethodGenerator {
         assert propertyDescriptor != null : "Property descriptor is expected to be non-null";
 
         JsFunction functionObject = generateJsMethod(function);
-        JsExpression returnExpression = new JsNameRef(context.getNameForDescriptor(propertyDescriptor), JsLiteral.THIS);
+        JsExpression returnExpression = JsAstUtils.fqnWithoutSideEffects(context.getNameForDescriptor(propertyDescriptor), JsLiteral.THIS);
         functionObject.getBody().getStatements().add(new JsReturn(returnExpression));
     }
 
@@ -75,15 +75,11 @@ class JsDataClassGenerator extends DataClassMethodGenerator {
         for (int i = 0; i < constructorParameters.size(); i++) {
             KtParameter constructorParam = constructorParameters.get(i);
 
-            ValueParameterDescriptor parameterDescriptor =
-                    (ValueParameterDescriptor) context.bindingContext().get(BindingContext.VALUE_PARAMETER, constructorParam);
-            assert parameterDescriptor != null : "Parameter descriptor is expected to be non-null: " +
-                                                 PsiUtilsKt.getTextWithLocation(constructorParam);
+            ValueParameterDescriptor parameterDescriptor = (ValueParameterDescriptor) BindingContextUtils.getNotNull(
+                    context.bindingContext(), BindingContext.VALUE_PARAMETER, constructorParam);
 
-            PropertyDescriptor propertyDescriptor = context.bindingContext().get(BindingContext.VALUE_PARAMETER_AS_PROPERTY,
-                                                                                 parameterDescriptor);
-            assert propertyDescriptor != null : "Property descriptor is expected to be non-null: " +
-                                                PsiUtilsKt.getTextWithLocation(constructorParam);
+            PropertyDescriptor propertyDescriptor = BindingContextUtils.getNotNull(
+                    context.bindingContext(), BindingContext.VALUE_PARAMETER_AS_PROPERTY, parameterDescriptor);
 
             JsName fieldName = context.getNameForDescriptor(propertyDescriptor);
             JsName paramName = context.getNameForDescriptor(parameterDescriptor);
