@@ -121,13 +121,16 @@ class GenerationState @JvmOverloads constructor(
         extraJvmDiagnosticsTrace.bindingContext.diagnostics
     }
 
+    val isJvm8Target: Boolean = configuration.get(JVMConfigurationKeys.JVM_8_TARGET, false)
+    val classFileVersion: Int = if (isJvm8Target) Opcodes.V1_8 else Opcodes.V1_6
+
     val moduleName: String = moduleName ?: JvmCodegenUtil.getModuleName(module)
     val classBuilderMode: ClassBuilderMode = builderFactory.classBuilderMode
     val bindingTrace: BindingTrace = DelegatingBindingTrace(bindingContext, "trace in GenerationState")
     val bindingContext: BindingContext = bindingTrace.bindingContext
     val typeMapper: KotlinTypeMapper = KotlinTypeMapper(
             this.bindingContext, classBuilderMode, fileClassesProvider, incrementalCacheForThisTarget,
-            IncompatibleClassTrackerImpl(extraJvmDiagnosticsTrace), this.moduleName
+            IncompatibleClassTrackerImpl(extraJvmDiagnosticsTrace), this.moduleName, classFileVersion
     )
     val intrinsics: IntrinsicMethods = IntrinsicMethods()
     val samWrapperClasses: SamWrapperClasses = SamWrapperClasses(this)
@@ -153,11 +156,8 @@ class GenerationState @JvmOverloads constructor(
     val isInlineEnabled: Boolean = !configuration.get(JVMConfigurationKeys.DISABLE_INLINE, false)
     val useTypeTableInSerializer: Boolean = configuration.get(JVMConfigurationKeys.USE_TYPE_TABLE, false)
     val inheritMultifileParts: Boolean = configuration.get(JVMConfigurationKeys.INHERIT_MULTIFILE_PARTS, false)
-    val isJvm8Target: Boolean = configuration.get(JVMConfigurationKeys.JVM_8_TARGET, false)
 
     val rootContext: CodegenContext<*> = RootContext(this)
-
-    val classFileVersion: Int = if (isJvm8Target) Opcodes.V1_8 else Opcodes.V1_6
 
     init {
         this.interceptedBuilderFactory = builderFactory
