@@ -40,7 +40,7 @@ import org.jetbrains.kotlin.resolve.calls.context.TemporaryTraceAndCache
 import org.jetbrains.kotlin.resolve.calls.util.FakeCallableDescriptorForObject
 import org.jetbrains.kotlin.types.ErrorUtils
 import org.jetbrains.kotlin.types.KotlinType
-import org.jetbrains.kotlin.types.KotlinTypeImpl
+import org.jetbrains.kotlin.types.KotlinTypeFactory
 import org.jetbrains.kotlin.types.TypeUtils
 import org.jetbrains.kotlin.types.expressions.typeInfoFactory.createTypeInfo
 
@@ -85,10 +85,9 @@ class DoubleColonExpressionResolver(
                 context.trace.report(ARRAY_CLASS_LITERAL_REQUIRES_ARGUMENT.on(expression))
             }
 
-            type = KotlinTypeImpl.create(
-                    Annotations.EMPTY, descriptor, possiblyBareType.isNullable,
-                    descriptor.typeConstructor.parameters.map(TypeUtils::makeStarProjection)
-            )
+            val arguments = descriptor.typeConstructor.parameters.map(TypeUtils::makeStarProjection)
+            type = KotlinTypeFactory.simpleType(Annotations.EMPTY, descriptor.typeConstructor, arguments,
+                                                possiblyBareType.isNullable, descriptor.getMemberScope(arguments))
         }
         else {
             type = possiblyBareType.actualType

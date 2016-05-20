@@ -45,7 +45,6 @@ import org.jetbrains.kotlin.storage.StorageManager
 import org.jetbrains.kotlin.types.*
 import org.jetbrains.kotlin.types.Variance.*
 import org.jetbrains.kotlin.types.typeUtil.isArrayOfNothing
-import java.util.*
 
 class TypeResolver(
         private val annotationResolver: AnnotationResolver,
@@ -325,12 +324,11 @@ class TypeResolver(
         return if (scopeForTypeParameter is ErrorUtils.ErrorScope)
             ErrorUtils.createErrorType("?")
         else
-            KotlinTypeImpl.create(
-                    annotations,
-                    typeParameter.typeConstructor,
-                    false,
-                    listOf(),
-                    scopeForTypeParameter)
+            KotlinTypeFactory.simpleType(annotations,
+                                         typeParameter.typeConstructor,
+                                         listOf(),
+                                         false,
+                                         scopeForTypeParameter)
     }
 
     private fun getScopeForTypeParameter(c: TypeResolutionContext, typeParameterDescriptor: TypeParameterDescriptor): MemberScope {
@@ -377,7 +375,7 @@ class TypeResolver(
             " but ${collectedArgumentAsTypeProjections.size} instead of ${parameters.size} found in ${type.text}"
         }
 
-        val resultingType = KotlinTypeImpl.create(annotations, classDescriptor, false, arguments)
+        val resultingType = KotlinTypeFactory.simpleNotNullType(annotations, classDescriptor, arguments)
 
         // We create flexible types by convention here
         // This is not intended to be used in normal users' environments, only for tests and debugger etc
@@ -440,7 +438,7 @@ class TypeResolver(
 
         return if (c.abbreviated) {
             val arguments = resolveTypeProjections(c, typeAliasDescriptor.typeConstructor, typeAliasArguments)
-            val abbreviatedType = KotlinTypeImpl.create(annotations, typeAliasDescriptor.typeConstructor, false, arguments, MemberScope.Empty)
+            val abbreviatedType = KotlinTypeFactory.simpleType(annotations, typeAliasDescriptor.typeConstructor, arguments, false, MemberScope.Empty)
             type(abbreviatedType)
         }
         else {
@@ -529,11 +527,11 @@ class TypeResolver(
             "Type alias expansion: result for ${typeAliasExpansion.descriptor} is ${expandedProjection.projectionKind}, should be invariant"
         }
 
-        val abbreviatedType = KotlinTypeImpl.create(annotations,
-                                                    typeAliasExpansion.descriptor.typeConstructor,
-                                                    originalProjection.type.isMarkedNullable,
-                                                    typeAliasExpansion.arguments,
-                                                    MemberScope.Empty)
+        val abbreviatedType = KotlinTypeFactory.simpleType(annotations,
+                                                           typeAliasExpansion.descriptor.typeConstructor,
+                                                           typeAliasExpansion.arguments,
+                                                           originalProjection.type.isMarkedNullable,
+                                                           MemberScope.Empty)
 
         return expandedType.withAbbreviatedType(abbreviatedType)
     }
