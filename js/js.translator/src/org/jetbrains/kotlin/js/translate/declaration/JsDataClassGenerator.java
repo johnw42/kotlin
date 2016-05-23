@@ -25,6 +25,7 @@ import org.jetbrains.kotlin.js.translate.context.TranslationContext;
 import org.jetbrains.kotlin.js.translate.utils.JsAstUtils;
 import org.jetbrains.kotlin.psi.KtClassOrObject;
 import org.jetbrains.kotlin.psi.KtParameter;
+import org.jetbrains.kotlin.psi.psiUtil.PsiUtilsKt;
 import org.jetbrains.kotlin.resolve.descriptorUtil.DescriptorUtilsKt;
 
 import java.util.ArrayList;
@@ -58,6 +59,9 @@ class JsDataClassGenerator extends DataClassMethodGenerator {
 
         for (int i = 0; i < constructorParameters.size(); i++) {
             KtParameter constructorParam = constructorParameters.get(i);
+            String paramSourceName = constructorParam.getName();
+            assert paramSourceName != null : "Constructor parameter of data class should have name: " +
+                                             PsiUtilsKt.getTextWithLocation(constructorParam);
             JsName paramName = funScope.declareName(constructorParam.getName());
 
             functionObj.getParameters().add(new JsParameter(paramName));
