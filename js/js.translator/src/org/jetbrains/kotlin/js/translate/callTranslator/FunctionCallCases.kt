@@ -45,7 +45,10 @@ fun CallArgumentTranslator.ArgumentsInfo.argsWithReceiver(receiver: JsExpression
 // call may be native and|or with spreadOperator
 object DefaultFunctionCallCase : FunctionCallCase() {
     // TODO: refactor after fix ArgumentsInfo - duplicate code
-    private fun nativeSpreadFunWithDispatchOrExtensionReceiver(argumentsInfo: CallArgumentTranslator.ArgumentsInfo, functionName: JsName): JsExpression {
+    private fun nativeSpreadFunWithDispatchOrExtensionReceiver(
+            argumentsInfo: CallArgumentTranslator.ArgumentsInfo,
+            functionName: JsName
+    ): JsExpression {
         val cachedReceiver = argumentsInfo.cachedReceiver!!
         val functionCallRef = Namer.getFunctionApplyRef(JsNameRef(functionName, cachedReceiver.assignmentExpression()))
         return JsInvocation(functionCallRef, argumentsInfo.translateArguments)
@@ -204,7 +207,9 @@ object ConstructorCallCase : FunctionCallCase() {
 
     override fun FunctionCallInfo.dispatchReceiver() = doTranslate { argsWithReceiver(dispatchReceiver!!) }
 
-    private inline fun FunctionCallInfo.doTranslate(getArguments: CallArgumentTranslator.ArgumentsInfo.() -> List<JsExpression>): JsExpression {
+    private inline fun FunctionCallInfo.doTranslate(
+            getArguments: CallArgumentTranslator.ArgumentsInfo.() -> List<JsExpression>
+    ): JsExpression {
         val fqName = context.getQualifiedReference(callableDescriptor)
         val functionRef = if (isNative()) fqName else context.aliasOrValue(callableDescriptor) { fqName }
         val arguments = argumentsInfo.getArguments()

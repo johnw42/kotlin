@@ -75,7 +75,8 @@ public final class TranslationUtils {
 
     @NotNull
     public static JsExpression translateExclForBinaryEqualLikeExpr(@NotNull JsBinaryOperation baseBinaryExpression) {
-        return new JsBinaryOperation(notOperator(baseBinaryExpression.getOperator()), baseBinaryExpression.getArg1(), baseBinaryExpression.getArg2());
+        return new JsBinaryOperation(notOperator(baseBinaryExpression.getOperator()), baseBinaryExpression.getArg1(),
+                                     baseBinaryExpression.getArg2());
     }
 
     public static boolean isEqualLikeOperator(@NotNull JsBinaryOperator operator) {
