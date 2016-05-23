@@ -238,6 +238,13 @@ public class TranslationContext {
     }
 
     @NotNull
+    public JsExpression defineTemporary(@NotNull JsExpression initExpression) {
+        TemporaryVariable var = dynamicContext.declareTemporary(initExpression);
+        addStatementToCurrentBlock(var.assignmentStatement());
+        return var.reference();
+    }
+
+    @NotNull
     public TemporaryConstVariable getOrDeclareTemporaryConstVariable(@NotNull JsExpression expression) {
         TemporaryConstVariable tempVar = expressionToTempConstVariableCache.get(expression);
 

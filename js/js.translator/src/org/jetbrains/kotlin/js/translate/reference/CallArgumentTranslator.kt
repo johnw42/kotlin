@@ -27,7 +27,6 @@ import org.jetbrains.kotlin.js.translate.general.AbstractTranslator
 import org.jetbrains.kotlin.js.translate.general.Translation
 import org.jetbrains.kotlin.js.translate.utils.AnnotationsUtils
 import org.jetbrains.kotlin.js.translate.utils.JsAstUtils
-import org.jetbrains.kotlin.js.translate.utils.JsAstUtils.asSyntheticStatement
 import org.jetbrains.kotlin.js.translate.utils.TranslationUtils
 import org.jetbrains.kotlin.psi.ValueArgument
 import org.jetbrains.kotlin.resolve.calls.model.*
@@ -288,12 +287,10 @@ class CallArgumentTranslator private constructor(
 
         private fun extractArguments(argExpressions: MutableList<JsExpression>, argContexts: List<TranslationContext>, context: TranslationContext) {
             for (i in argExpressions.indices) {
-                val argContext = argContexts.get(i)
-                val jsArgExpression = argExpressions.get(i)
+                val argContext = argContexts[i]
+                val jsArgExpression = argExpressions[i]
                 if (argContext.currentBlockIsEmpty() && TranslationUtils.isCacheNeeded(jsArgExpression)) {
-                    val temporaryVariable = context.declareTemporary(jsArgExpression)
-                    context.addStatementToCurrentBlock(asSyntheticStatement(temporaryVariable.assignmentExpression()))
-                    argExpressions[i] = temporaryVariable.reference()
+                    argExpressions[i] = context.defineTemporary(jsArgExpression)
                 }
                 else {
                     context.addStatementsToCurrentBlockFrom(argContext)
