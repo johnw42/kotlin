@@ -459,3 +459,5 @@ fun KtElement.nonStaticOuterClasses(): Sequence<KtClass> {
 }
 
 fun KtElement.containingClass(): KtClass? = getStrictParentOfType<KtClass>()
+
+fun KtElement.containingClassOrObject(): KtClassOrObject? = getStrictParentOfType<KtClassOrObject>()
