@@ -26,6 +26,7 @@ import com.intellij.refactoring.JavaRefactoringSettings
 import com.intellij.refactoring.RefactoringBundle
 import com.intellij.refactoring.rename.naming.AutomaticRenamer
 import com.intellij.refactoring.rename.naming.AutomaticRenamerFactory
+import com.intellij.refactoring.rename.naming.NameSuggester
 import com.intellij.usageView.UsageInfo
 import org.jetbrains.kotlin.asJava.toLightClass
 import org.jetbrains.kotlin.builtins.KotlinBuiltIns
@@ -76,6 +77,12 @@ class AutomaticVariableRenamer(
         }
 
         suggestAllNames(klass.name, newClassName)
+    }
+
+    override fun suggestNameForElement(element: PsiNamedElement, suggester: NameSuggester, newClassName: String, oldClassName: String): String? {
+        val oldName = element.name
+        val suggestedName = super.suggestNameForElement(element, suggester, newClassName, oldClassName)
+        return if (oldName != null && oldName.all { it == '_' || it.isUpperCase() }) suggestedName.toUpperCase() else suggestedName
     }
 
     override fun getDialogTitle() = RefactoringBundle.message("rename.variables.title")
