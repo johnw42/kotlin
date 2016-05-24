@@ -1280,6 +1280,7 @@ class ControlFlowProcessor(private val trace: BindingTrace) {
             if (classOrObject.isLocal()) {
                 for (declaration in classOrObject.declarations) {
                     if (declaration is KtSecondaryConstructor ||
+                        declaration is KtClassOrObject ||
                         declaration is KtProperty ||
                         declaration is KtAnonymousInitializer) {
                         continue

@@ -12,7 +12,7 @@ class Outer : Trait {
             val s = super@Outer.bar()
             
             inner class Inner {
-                val t = <!DEBUG_INFO_LEAKING_THIS!>this@Local<!>
+                val t = this@Local
                 val s = super@Local.bar()
                 
                 val tt = this@Outer
