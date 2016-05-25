@@ -70,12 +70,7 @@ class MultifileClassCodegen(
             if (compiledPackageFragment == null)
                 emptyList<DeserializedCallableMemberDescriptor>()
             else
-                getDeserializedCallables(compiledPackageFragment)
-
-    private fun getDeserializedCallables(compiledPackageFragment: PackageFragmentDescriptor) =
-            compiledPackageFragment.getMemberScope()
-                    .getContributedDescriptors(DescriptorKindFilter.CALLABLES, MemberScope.ALL_NAME_FILTER)
-                    .filterIsInstance<DeserializedCallableMemberDescriptor>()
+                Companion.getDeserializedCallables(compiledPackageFragment)
 
     private fun KtFile.getFileClassFqName() =
             state.fileClassesProvider.getFileClassInfo(this).fileClassFqName
@@ -395,6 +390,11 @@ class MultifileClassCodegen(
 
             return incrementalPackageFragment?.getPackageFragmentForMultifileClass(facadeFqName)
         }
+
+        private fun getDeserializedCallables(compiledPackageFragment: PackageFragmentDescriptor) =
+                compiledPackageFragment.getMemberScope()
+                        .getContributedDescriptors(DescriptorKindFilter.CALLABLES, MemberScope.ALL_NAME_FILTER)
+                        .filterIsInstance<DeserializedCallableMemberDescriptor>()
     }
 
 }

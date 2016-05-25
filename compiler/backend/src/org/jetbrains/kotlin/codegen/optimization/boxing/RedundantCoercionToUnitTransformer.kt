@@ -38,22 +38,15 @@ class RedundantCoercionToUnitTransformer : MethodTransformer() {
             fun apply(insn: AbstractInsnNode)
         }
 
-        private inline fun Transformation(crossinline body: (AbstractInsnNode) -> Unit): Transformation =
-                object : Transformation {
-                    override fun apply(insn: AbstractInsnNode) {
-                        body(insn)
-                    }
-                }
-
-        private val REPLACE_WITH_NOP = Transformation { insnList.replaceNodeGetNext(it, createRemovableNopInsn()) }
-        private val REPLACE_WITH_POP1 = Transformation { insnList.replaceNodeGetNext(it, InsnNode(Opcodes.POP)) }
-        private val REPLACE_WITH_POP2 = Transformation { insnList.replaceNodeGetNext(it, InsnNode(Opcodes.POP2)) }
-        private val INSERT_POP1_AFTER = Transformation { insnList.insert(it, InsnNode(Opcodes.POP)) }
-        private val INSERT_POP2_AFTER = Transformation { insnList.insert(it, InsnNode(Opcodes.POP2)) }
-
         private val insnList = methodNode.instructions
 
         private val insns = insnList.toArray()
+
+        private val REPLACE_WITH_NOP = Companion.Transformation { insnList.replaceNodeGetNext(it, createRemovableNopInsn()) }
+        private val REPLACE_WITH_POP1 = Companion.Transformation { insnList.replaceNodeGetNext(it, InsnNode(Opcodes.POP)) }
+        private val REPLACE_WITH_POP2 = Companion.Transformation { insnList.replaceNodeGetNext(it, InsnNode(Opcodes.POP2)) }
+        private val INSERT_POP1_AFTER = Companion.Transformation { insnList.insert(it, InsnNode(Opcodes.POP)) }
+        private val INSERT_POP2_AFTER = Companion.Transformation { insnList.insert(it, InsnNode(Opcodes.POP2)) }
 
         private val dontTouchInsns = hashSetOf<AbstractInsnNode>()
         private val transformations = hashMapOf<AbstractInsnNode, Transformation>()
@@ -227,6 +220,15 @@ class RedundantCoercionToUnitTransformer : MethodTransformer() {
 
         private fun isDontTouch(insn: AbstractInsnNode) =
                 insn in dontTouchInsns
+
+        companion object {
+            private inline fun Transformation(crossinline body: (AbstractInsnNode) -> Unit): Transformation =
+                    object : Transformation {
+                        override fun apply(insn: AbstractInsnNode) {
+                            body(insn)
+                        }
+                    }
+        }
     }
 
 }

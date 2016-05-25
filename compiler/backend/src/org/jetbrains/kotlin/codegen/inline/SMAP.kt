@@ -257,13 +257,11 @@ class SMAP(val fileMappings: List<FileMapping>) {
         assert(fileMappings.isNotEmpty()) { "File Mappings shouldn't be empty" }
     }
 
-    val default: FileMapping
-        get() = fileMappings.first()
-
     val intervals = fileMappings.flatMap { it.lineMappings }.sortedWith(RangeMapping.Comparator)
 
     val sourceInfo: SourceInfo
     init {
+        val default = fileMappings.first()
         val defaultMapping = default.lineMappings.first()
         sourceInfo = SourceInfo(default.name, default.path, defaultMapping.source + defaultMapping.range - 1)
     }
