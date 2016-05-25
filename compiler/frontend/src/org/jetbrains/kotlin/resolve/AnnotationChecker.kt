@@ -28,6 +28,7 @@ import org.jetbrains.kotlin.descriptors.annotations.KotlinTarget.*
 import org.jetbrains.kotlin.diagnostics.Errors
 import org.jetbrains.kotlin.psi.*
 import org.jetbrains.kotlin.psi.psiUtil.getAnnotationEntries
+import org.jetbrains.kotlin.resolve.AnnotationChecker.Companion.TargetLists.ListBuilder.targetList
 import org.jetbrains.kotlin.resolve.constants.ArrayValue
 import org.jetbrains.kotlin.resolve.constants.EnumValue
 import org.jetbrains.kotlin.resolve.descriptorUtil.getAnnotationRetention
@@ -215,7 +216,7 @@ class AnnotationChecker(private val additionalCheckers: Iterable<AdditionalAnnot
             }
         }
 
-        private object TargetLists {
+        internal object TargetLists {
             val T_CLASSIFIER = targetList(CLASS)
 
             val T_LOCAL_VARIABLE = targetList(LOCAL_VARIABLE) {
@@ -295,16 +296,17 @@ class AnnotationChecker(private val additionalCheckers: Iterable<AdditionalAnnot
 
             val T_INITIALIZER = targetList(INITIALIZER)
 
-
-            private fun targetList(vararg target: KotlinTarget, otherTargets: TargetListBuilder.() -> Unit = {}): TargetList {
-                val builder = TargetListBuilder(*target)
-                builder.otherTargets()
-                return builder.build()
+            internal object ListBuilder {
+                fun targetList(vararg target: KotlinTarget, otherTargets: TargetListBuilder.() -> Unit = {}): TargetList {
+                    val builder = TargetListBuilder(*target)
+                    builder.otherTargets()
+                    return builder.build()
+                }
             }
 
             val EMPTY = targetList()
 
-            private class TargetListBuilder(vararg val defaultTargets: KotlinTarget) {
+            internal class TargetListBuilder(vararg val defaultTargets: KotlinTarget) {
                 private var canBeSubstituted: List<KotlinTarget> = listOf()
                 private var onlyWithUseSiteTarget: List<KotlinTarget> = listOf()
 
@@ -320,7 +322,7 @@ class AnnotationChecker(private val additionalCheckers: Iterable<AdditionalAnnot
             }
         }
 
-        private class TargetList(
+        internal class TargetList(
                 val defaultTargets: List<KotlinTarget>,
                 val canBeSubstituted: List<KotlinTarget> = emptyList(),
                 val onlyWithUseSiteTarget: List<KotlinTarget> = emptyList())
