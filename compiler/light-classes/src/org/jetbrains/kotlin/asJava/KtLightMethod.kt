@@ -26,6 +26,7 @@ import com.intellij.psi.util.*
 import com.intellij.util.IncorrectOperationException
 import org.jetbrains.kotlin.idea.KotlinLanguage
 import org.jetbrains.kotlin.psi.*
+import org.jetbrains.kotlin.resolve.DescriptorUtils
 import org.jetbrains.kotlin.resolve.jvm.diagnostics.JvmDeclarationOriginKind
 
 interface KtLightMethod : PsiMethod, KtLightDeclaration<KtDeclaration, PsiMethod> {
@@ -99,8 +100,15 @@ sealed class KtLightMethodImpl(
     }
 
     override fun setName(name: String): PsiElement? {
-        val toRename = kotlinOrigin as? PsiNamedElement ?: throwCanNotModify()
-        toRename.setName(propertyNameByAccessor(name, this) ?: name)
+        val jvmNameAnnotation = modifierList.findAnnotation(DescriptorUtils.JVM_NAME.asString())
+        val nameExpression = jvmNameAnnotation?.findAttributeValue("name")?.unwrapped as? KtStringTemplateExpression
+        if (nameExpression != null) {
+            nameExpression.replace(KtPsiFactory(this).createStringTemplate(name))
+        }
+        else {
+            val toRename = kotlinOrigin as? PsiNamedElement ?: throwCanNotModify()
+            toRename.setName(propertyNameByAccessor(name, this) ?: name)
+        }
         return this
     }
 
