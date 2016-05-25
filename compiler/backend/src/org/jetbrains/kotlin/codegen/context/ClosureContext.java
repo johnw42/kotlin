@@ -26,6 +26,21 @@ import static org.jetbrains.kotlin.codegen.binding.CodegenBinding.anonymousClass
 
 public class ClosureContext extends ClassContext {
     private final FunctionDescriptor functionDescriptor;
+    private final FunctionDescriptor coroutineDescriptor;
+
+    public ClosureContext(
+            @NotNull KotlinTypeMapper typeMapper,
+            @NotNull FunctionDescriptor functionDescriptor,
+            @Nullable CodegenContext parentContext,
+            @NotNull LocalLookup localLookup,
+            @Nullable FunctionDescriptor coroutineDescriptor
+    ) {
+        super(typeMapper, anonymousClassForCallable(typeMapper.getBindingContext(), functionDescriptor),
+              OwnerKind.IMPLEMENTATION, parentContext, localLookup);
+
+        this.functionDescriptor = functionDescriptor;
+        this.coroutineDescriptor = coroutineDescriptor;
+    }
 
     public ClosureContext(
             @NotNull KotlinTypeMapper typeMapper,
@@ -33,10 +48,7 @@ public class ClosureContext extends ClassContext {
             @Nullable CodegenContext parentContext,
             @NotNull LocalLookup localLookup
     ) {
-        super(typeMapper, anonymousClassForCallable(typeMapper.getBindingContext(), functionDescriptor),
-              OwnerKind.IMPLEMENTATION, parentContext, localLookup);
-
-        this.functionDescriptor = functionDescriptor;
+        this(typeMapper, functionDescriptor, parentContext, localLookup, null);
     }
 
     @NotNull
@@ -47,5 +59,10 @@ public class ClosureContext extends ClassContext {
     @Override
     public String toString() {
         return "Closure: " + getContextDescriptor();
+    }
+
+    @Nullable
+    public FunctionDescriptor getCoroutineDescriptor() {
+        return coroutineDescriptor;
     }
 }

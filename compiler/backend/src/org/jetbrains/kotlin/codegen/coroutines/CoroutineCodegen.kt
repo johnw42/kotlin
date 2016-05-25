@@ -181,7 +181,8 @@ class CoroutineCodegen(
             return CoroutineCodegen(
                     state,
                     declaration,
-                    expressionCodegen.context.intoClosure(functionDescriptorWithContinuationReturnType, expressionCodegen, state.typeMapper),
+                    expressionCodegen.context.intoCoroutineClosure(
+                            functionDescriptor, functionDescriptorWithContinuationReturnType, expressionCodegen, state.typeMapper),
                     FunctionGenerationStrategy.FunctionDefault(state, declaration), expressionCodegen.parentCodegen, classBuilder,
                     continuationSupertype,
                     functionDescriptor.controllerTypeIfCoroutine!!)

@@ -333,6 +333,18 @@ public abstract class CodegenContext<T extends DeclarationDescriptor> {
         return new ClosureContext(typeMapper, funDescriptor, this, localLookup);
     }
 
+    @NotNull
+    public ClosureContext intoCoroutineClosure(
+            // fun resume(Any?, Throwable): Unit
+            @NotNull FunctionDescriptor coroutineLambdaDescriptor,
+            // fun invoke(Controller): Continuation
+            @NotNull FunctionDescriptor funDescriptorReturningContinuation,
+            @NotNull LocalLookup localLookup,
+            @NotNull KotlinTypeMapper typeMapper
+    ) {
+        return new ClosureContext(typeMapper, funDescriptorReturningContinuation, this, localLookup, coroutineLambdaDescriptor);
+    }
+
     @Nullable
     public CodegenContext getParentContext() {
         return parentContext;
