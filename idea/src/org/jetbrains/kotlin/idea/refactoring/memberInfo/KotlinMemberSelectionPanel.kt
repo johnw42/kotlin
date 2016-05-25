@@ -36,12 +36,14 @@ class KotlinMemberSelectionPanel(title: String,
         add(scrollPane, BorderLayout.CENTER)
     }
 
-    private fun createMemberSelectionTable(
-            memberInfo: List<KotlinMemberInfo>,
-            abstractColumnHeader: String?
-    ): KotlinMemberSelectionTable {
-        return KotlinMemberSelectionTable(memberInfo, null, abstractColumnHeader)
-    }
-
     override fun getTable() = table
+
+    companion object {
+        private fun createMemberSelectionTable(
+                memberInfo: List<KotlinMemberInfo>,
+                abstractColumnHeader: String?
+        ): KotlinMemberSelectionTable {
+            return KotlinMemberSelectionTable(memberInfo, null, abstractColumnHeader)
+        }
+    }
 }

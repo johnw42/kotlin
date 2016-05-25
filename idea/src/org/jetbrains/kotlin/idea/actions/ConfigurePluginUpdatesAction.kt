@@ -112,9 +112,8 @@ class ConfigurePluginUpdatesDialog(project: Project) : DialogWrapper(project, fa
         super.doCancelAction()
     }
 
-    private fun hasEAPChannel() = EAP_UPDATE_HOST in UpdateSettings.getInstance().pluginHosts
-
     companion object {
         val EAP_UPDATE_HOST = "https://plugins.jetbrains.com/plugins/eap/6954"
+        private fun hasEAPChannel() = EAP_UPDATE_HOST in UpdateSettings.getInstance().pluginHosts
     }
 }

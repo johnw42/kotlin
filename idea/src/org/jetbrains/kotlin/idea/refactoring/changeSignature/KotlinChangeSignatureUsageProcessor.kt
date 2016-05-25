@@ -757,8 +757,8 @@ class KotlinChangeSignatureUsageProcessor : ChangeSignatureUsageProcessor {
             this.javaPsiFacade = JavaPsiFacade.getInstance(project)
             this.javaCodeStyleManager = JavaCodeStyleManager.getInstance(project)
 
-            this.methodAnnotation = getNullabilityAnnotation(baseMethod)
             this.parameterAnnotations = baseMethod.parameterList.parameters.map { getNullabilityAnnotation(it) }.toTypedArray()
+            this.methodAnnotation = getNullabilityAnnotation(baseMethod)
         }
 
         private fun getNullabilityAnnotation(element: PsiModifierListOwner): PsiAnnotation? {

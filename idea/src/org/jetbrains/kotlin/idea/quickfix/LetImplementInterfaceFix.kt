@@ -39,8 +39,6 @@ class LetImplementInterfaceFix(
         expressionType: KotlinType
 ) : KotlinQuickFixAction<KtClassOrObject>(element), LowPriorityAction {
 
-    private fun KotlinType.renderShort() = IdeDescriptorRenderers.SOURCE_CODE_SHORT_NAMES_IN_TYPES.renderType(this)
-
     private val expectedTypeName: String
 
     private val expectedTypeNameSourceCode: String
@@ -51,8 +49,8 @@ class LetImplementInterfaceFix(
 
     init {
         val expectedTypeNotNullable = TypeUtils.makeNotNullable(expectedType)
-        expectedTypeName = expectedTypeNotNullable.renderShort()
         expectedTypeNameSourceCode = IdeDescriptorRenderers.SOURCE_CODE.renderType(expectedTypeNotNullable)
+        expectedTypeName = expectedTypeNotNullable.renderShort()
 
         val verb = if (expressionType.isInterface()) "extend" else "implement"
         val typeDescription = if (element.isObjectLiteral()) "the anonymous object" else "'${expressionType.renderShort()}'"
@@ -85,5 +83,9 @@ class LetImplementInterfaceFix(
             FileEditorManager.getInstance(project).openFile(containingFile.virtualFile, true)
             implementMembersHandler.invoke(project, editor, containingFile)
         }
+    }
+
+    companion object {
+        private fun KotlinType.renderShort() = IdeDescriptorRenderers.SOURCE_CODE_SHORT_NAMES_IN_TYPES.renderType(this)
     }
 }

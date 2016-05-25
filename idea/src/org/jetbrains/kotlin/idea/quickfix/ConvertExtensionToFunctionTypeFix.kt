@@ -48,13 +48,6 @@ class ConvertExtensionToFunctionTypeFix(element: KtTypeReference, type: KotlinTy
         ShortenReferences.DEFAULT.process(replaced)
     }
 
-    private fun KotlinType.renderType(renderer: DescriptorRenderer) = buildString {
-        append('(')
-        arguments.dropLast(1).map { renderer.renderType(it.type) }.joinTo(this@buildString, ", ")
-        append(") -> ")
-        append(renderer.renderType(getReturnTypeFromFunctionType(this@renderType)))
-    }
-
     companion object Factory : KotlinIntentionActionsFactory() {
         override fun doCreateActions(diagnostic: Diagnostic): List<IntentionAction> {
             val casted = Errors.SUPERTYPE_IS_EXTENSION_FUNCTION_TYPE.cast(diagnostic)
@@ -64,6 +57,13 @@ class ConvertExtensionToFunctionTypeFix(element: KtTypeReference, type: KotlinTy
             if (!type.isExtensionFunctionType) return emptyList()
 
             return listOf(ConvertExtensionToFunctionTypeFix(element, type))
+        }
+
+        private fun KotlinType.renderType(renderer: DescriptorRenderer) = buildString {
+            append('(')
+            arguments.dropLast(1).map { renderer.renderType(it.type) }.joinTo(this@buildString, ", ")
+            append(") -> ")
+            append(renderer.renderType(getReturnTypeFromFunctionType(this@renderType)))
         }
     }
 }
