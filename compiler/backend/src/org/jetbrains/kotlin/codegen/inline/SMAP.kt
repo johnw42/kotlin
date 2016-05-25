@@ -203,7 +203,7 @@ open class DefaultSourceMapper(val sourceInfo: SourceInfo) : SourceMapper {
         val path = sourceInfo.pathOrCleanFQN
         origin = RawFileMapping(name, path)
         origin.initRange(1, sourceInfo.linesInFile)
-        fileMappings.put(Companion.createKey(name, path), origin)
+        fileMappings.put(createKey(name, path), origin)
     }
 
     constructor(sourceInfo: SourceInfo, fileMappings: List<FileMapping>): this(sourceInfo) {
@@ -219,7 +219,7 @@ open class DefaultSourceMapper(val sourceInfo: SourceInfo) : SourceMapper {
     }
 
     private fun getOrRegisterNewSource(name: String, path: String): RawFileMapping {
-        return fileMappings.getOrPut(Companion.createKey(name, path)) { RawFileMapping(name, path) }
+        return fileMappings.getOrPut(createKey(name, path)) { RawFileMapping(name, path) }
     }
 
     override fun mapLineNumber(lineNumber: Int): Int {

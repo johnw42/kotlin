@@ -41,7 +41,7 @@ class KotlinBuiltInDeserializerForDecompiler(
         private val nameResolver: NameResolver
 ) : DeserializerForDecompilerBase(packageDirectory, packageFqName) {
     override val targetPlatform: TargetPlatform get() = TargetPlatform.Default
-    override val builtIns = DefaultBuiltIns.Instance
+    override val builtIns: KotlinBuiltIns get() = DefaultBuiltIns.Instance
 
     override val deserializationComponents: DeserializationComponents
 

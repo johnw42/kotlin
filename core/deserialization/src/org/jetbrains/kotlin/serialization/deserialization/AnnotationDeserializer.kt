@@ -37,7 +37,8 @@ import org.jetbrains.kotlin.types.Variance
 import org.jetbrains.kotlin.types.typeUtil.isSubtypeOf
 
 class AnnotationDeserializer(private val module: ModuleDescriptor, private val notFoundClasses: NotFoundClasses) {
-    private val builtIns = module.builtIns
+    private val builtIns: KotlinBuiltIns
+        get() = module.builtIns
 
     private val factory = ConstantValueFactory(builtIns)
 
