@@ -20,26 +20,27 @@ import com.intellij.codeInspection.LocalInspectionToolSession
 import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.psi.PsiElementVisitor
-import org.jetbrains.kotlin.cfg.LeakingThisDescriptor
+import org.jetbrains.kotlin.cfg.LeakingThisDescriptor.*
 import org.jetbrains.kotlin.idea.caches.resolve.analyzeFully
-import org.jetbrains.kotlin.psi.KtClassOrObject
+import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtVisitorVoid
-import org.jetbrains.kotlin.resolve.BindingContext
+import org.jetbrains.kotlin.resolve.BindingContext.LEAKING_THIS
 
 class LeakingThisInspection : AbstractKotlinInspection() {
     override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean, session: LocalInspectionToolSession): PsiElementVisitor {
         return object : KtVisitorVoid() {
-            override fun visitClassOrObject(klass: KtClassOrObject) {
-                val context = klass.analyzeFully()
-                for (expression in context.getKeys(BindingContext.LEAKING_THIS)) {
-                    val leakingThisDescriptor = context.get(BindingContext.LEAKING_THIS, expression)
+            override fun visitKtFile(file: KtFile) {
+                val context = file.analyzeFully()
+                val expressions = context.getKeys(LEAKING_THIS)
+                for (expression in expressions) {
+                    val leakingThisDescriptor = context.get(LEAKING_THIS, expression)
                     val description = when (leakingThisDescriptor) {
-                        is LeakingThisDescriptor.PropertyIsNull ->
-                            "NPE risk: leaking this while not-null ${leakingThisDescriptor.property.name.asString()} is still null"
-                        is LeakingThisDescriptor.NonFinalClass ->
-                            "Leaking this in non-final class ${leakingThisDescriptor.klass.name.asString()}"
-                        is LeakingThisDescriptor.NonFinalProperty ->
-                            "Leaking this accessing non-final property ${leakingThisDescriptor.property.name.asString()}"
+                        is PropertyIsNull ->
+                            "NPE risk: leaking this in constructor while not-null ${leakingThisDescriptor.property.name} is still null"
+                        is NonFinalClass ->
+                            "NPE risk: leaking this in constructor of non-final class ${leakingThisDescriptor.klass.name}"
+                        is NonFinalProperty ->
+                            "NPE risk: leaking this in constructor while accessing non-final property ${leakingThisDescriptor.property.name}"
                         null -> null
                     }
                     if (description != null) {
