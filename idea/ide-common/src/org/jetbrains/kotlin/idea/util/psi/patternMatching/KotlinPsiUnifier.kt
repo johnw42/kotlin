@@ -101,6 +101,12 @@ class KotlinPsiUnifier(
 ) {
     companion object {
         val DEFAULT = KotlinPsiUnifier()
+
+        private fun KotlinPsiRange.getBindingContext(): BindingContext {
+            val element = (this as? KotlinPsiRange.ListRange)?.startElement as? KtElement
+            if ((element?.containingFile as? KtFile)?.doNotAnalyze != null) return BindingContext.EMPTY
+            return element?.getContextForContainingDeclarationBody() ?: BindingContext.EMPTY
+        }
     }
 
     private inner class Context(
@@ -114,13 +120,7 @@ class KotlinPsiUnifier(
         val weakMatches = HashMap<KtElement, KtElement>()
         var checkEquivalence: Boolean = false
         var targetSubstringInfo: ExtractableSubstringInfo? = null
-
-        private fun KotlinPsiRange.getBindingContext(): BindingContext {
-            val element = (this as? KotlinPsiRange.ListRange)?.startElement as? KtElement
-            if ((element?.containingFile as? KtFile)?.doNotAnalyze != null) return BindingContext.EMPTY
-            return element?.getContextForContainingDeclarationBody() ?: BindingContext.EMPTY
-        }
-
+        
         private fun matchDescriptors(d1: DeclarationDescriptor?, d2: DeclarationDescriptor?): Boolean {
             if (d1 == d2 || d2 in declarationPatternsToTargets[d1] || d1 in declarationPatternsToTargets[d2]) return true
             if (d1 == null || d2 == null) return false

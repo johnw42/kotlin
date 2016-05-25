@@ -60,7 +60,7 @@ open class AnalysisResult protected constructor(
     private class Error(bindingContext: BindingContext, val exception: Throwable) : AnalysisResult(bindingContext, ErrorUtils.getErrorModule())
 
     companion object {
-        val EMPTY: AnalysisResult = success(BindingContext.EMPTY, ErrorUtils.getErrorModule())
+        val EMPTY = AnalysisResult(BindingContext.EMPTY, ErrorUtils.getErrorModule(), true)
 
         @JvmStatic fun success(bindingContext: BindingContext, module: ModuleDescriptor): AnalysisResult {
             return AnalysisResult(bindingContext, module, true)

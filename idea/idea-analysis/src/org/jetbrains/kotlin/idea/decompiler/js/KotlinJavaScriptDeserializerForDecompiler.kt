@@ -50,7 +50,7 @@ class KotlinJavaScriptDeserializerForDecompiler(
     }
 
     override val targetPlatform: TargetPlatform get() = JsPlatform
-    override val builtIns: KotlinBuiltIns get() = DefaultBuiltIns.Instance
+    override val builtIns = DefaultBuiltIns.Instance
 
     private val classDataFinder = KotlinJavascriptClassDataFinder(nameResolver) { path ->
         packageDirectory.findChild(path.substringAfterLast("/"))?.inputStream

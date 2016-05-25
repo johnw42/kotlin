@@ -58,6 +58,8 @@ class KotlinCallableDefinitionUsage<T : PsiElement>(
 ) : KotlinUsageInfo<T>(function) {
     val baseFunction: KotlinCallableDefinitionUsage<*> = baseFunction ?: this
 
+    val isInherited = baseFunction !== this
+
     val hasExpectedType: Boolean = checkIfHasExpectedType(originalCallableDescriptor, isInherited)
 
     val currentCallableDescriptor: CallableDescriptor? by lazy {
@@ -83,22 +85,8 @@ class KotlinCallableDefinitionUsage<T : PsiElement>(
         }
     }
 
-    private fun checkIfHasExpectedType(callableDescriptor: CallableDescriptor, isInherited: Boolean): Boolean {
-        if (!(callableDescriptor is AnonymousFunctionDescriptor && isInherited)) return false
-
-        val functionLiteral = DescriptorToSourceUtils.descriptorToDeclaration(callableDescriptor) as KtFunctionLiteral?
-        assert(functionLiteral != null) { "No declaration found for " + callableDescriptor }
-
-        val parent = functionLiteral!!.parent as? KtLambdaExpression ?: return false
-
-        return parent.analyze(BodyResolveMode.PARTIAL)[BindingContext.EXPECTED_EXPRESSION_TYPE, parent] != null
-    }
-
     val declaration: PsiElement
         get() = element!!
-
-    val isInherited: Boolean
-        get() = baseFunction !== this
 
     override fun processUsage(changeInfo: KotlinChangeInfo, element: T, allUsages: Array<out UsageInfo>): Boolean {
         if (element !is KtNamedDeclaration) return true
@@ -262,5 +250,18 @@ class KotlinCallableDefinitionUsage<T : PsiElement>(
 
         val newIdentifier = psiFactory.createIdentifier(parameterInfo.getInheritedName(this))
         parameter.nameIdentifier?.replace(newIdentifier)
+    }
+
+    companion object {
+        private fun checkIfHasExpectedType(callableDescriptor: CallableDescriptor, isInherited: Boolean): Boolean {
+            if (!(callableDescriptor is AnonymousFunctionDescriptor && isInherited)) return false
+
+            val functionLiteral = DescriptorToSourceUtils.descriptorToDeclaration(callableDescriptor) as KtFunctionLiteral?
+            assert(functionLiteral != null) { "No declaration found for " + callableDescriptor }
+
+            val parent = functionLiteral!!.parent as? KtLambdaExpression ?: return false
+
+            return parent.analyze(BodyResolveMode.PARTIAL)[BindingContext.EXPECTED_EXPRESSION_TYPE, parent] != null
+        }
     }
 }

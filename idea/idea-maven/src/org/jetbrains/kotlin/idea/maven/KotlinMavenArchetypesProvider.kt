@@ -69,20 +69,6 @@ class KotlinMavenArchetypesProvider(val kotlinPluginVersion: String) : MavenArch
         return versions.maxBy { MavenVersionComparable(it.version) }
     }
 
-    private fun mavenSearchUrl(group: String, artifactId: String? = null, version: String? = null, packaging: String? = null, rowsLimit: Int = 20): String {
-        val q = listOf(
-                "g" to group,
-                "a" to artifactId,
-                "v" to version,
-                "p" to packaging
-        )
-                .filter { it.second != null }
-                .map { "${it.first}:\"${it.second}\"" }
-                .joinToString(separator = " AND ")
-
-        return "http://search.maven.org/solrsearch/select?q=${q.encodeURL()}&core=gav&rows=$rowsLimit&wt=json"
-    }
-
     private fun <R> connectAndApply(url: String, timeoutSeconds: Int = 15, block: (HttpURLConnection) -> R): R {
         return HttpConfigurable.getInstance().openHttpConnection(url).use { urlConnection ->
             val timeout = TimeUnit.SECONDS.toMillis(timeoutSeconds.toLong()).toInt()
@@ -102,5 +88,21 @@ class KotlinMavenArchetypesProvider(val kotlinPluginVersion: String) : MavenArch
             disconnect()
         }
 
-    private fun String.encodeURL() = URLEncoder.encode(this, "UTF-8")
+    companion object {
+        private fun mavenSearchUrl(group: String, artifactId: String? = null, version: String? = null, packaging: String? = null, rowsLimit: Int = 20): String {
+            val q = listOf(
+                    "g" to group,
+                    "a" to artifactId,
+                    "v" to version,
+                    "p" to packaging
+            )
+                    .filter { it.second != null }
+                    .map { "${it.first}:\"${it.second}\"" }
+                    .joinToString(separator = " AND ")
+
+            return "http://search.maven.org/solrsearch/select?q=${q.encodeURL()}&core=gav&rows=$rowsLimit&wt=json"
+        }
+
+        private fun String.encodeURL() = URLEncoder.encode(this, "UTF-8")
+    }
 }

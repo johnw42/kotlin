@@ -143,6 +143,11 @@ class CommentSaver(originalElements: PsiChildRange, private val saveLineBreaks: 
     private var toNewPsiElementMap by Delegates.notNull<MutableMap<TreeElement, MutableCollection<PsiElement>>>()
     private var needAdjustIndentAfterRestore = false
 
+    private val nonSpaceAndNonEmptyFilter = { element: PsiElement -> element !is PsiWhiteSpace && element.textLength > 0 }
+
+    var isFinished = false
+        private set
+
     init {
         if (saveLineBreaks || originalElements.any { it.anyDescendantOfType<PsiComment>() }) {
             originalElements.save(null)
@@ -183,9 +188,6 @@ class CommentSaver(originalElements: PsiChildRange, private val saveLineBreaks: 
     private var PsiElement.savedTreeElement: TreeElement?
         get() = getCopyableUserData(SAVED_TREE_KEY)
         set(value) = putCopyableUserData(SAVED_TREE_KEY, value)
-
-    var isFinished = false
-        private set
 
     fun deleteCommentsInside(element: PsiElement) {
         assert(!isFinished)
@@ -467,8 +469,6 @@ class CommentSaver(originalElements: PsiChildRange, private val saveLineBreaks: 
         val next = putAfter.nextLeaf(nonSpaceAndNonEmptyFilter)
         return if (next?.tokenType == KtTokens.COMMA) next!! else putAfter
     }
-
-    private val nonSpaceAndNonEmptyFilter = { element: PsiElement -> element !is PsiWhiteSpace && element.textLength > 0 }
 
     companion object {
         //TODO: making it private causes error on runtime (KT-7874?)

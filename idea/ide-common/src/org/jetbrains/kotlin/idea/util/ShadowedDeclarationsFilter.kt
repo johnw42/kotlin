@@ -142,7 +142,7 @@ class ShadowedDeclarationsFilter(
         class DummyArgument(val index: Int) : ValueArgument {
             private val expression = dummyArgumentExpressions[index]
 
-            private val argumentName: ValueArgumentName? = if (isNamed()) {
+            private val argumentName: ValueArgumentName? = if (index >= useNamedFromIndex) {
                 object : ValueArgumentName {
                     override val asName = parameters[index].name
                     override val referenceExpression = null

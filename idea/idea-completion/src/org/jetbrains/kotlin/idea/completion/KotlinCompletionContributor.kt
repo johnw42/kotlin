@@ -55,6 +55,19 @@ class KotlinCompletionContributor : CompletionContributor() {
         private val STRING_TEMPLATE_AFTER_DOT_REAL_START_OFFSET = OffsetKey.create("STRING_TEMPLATE_AFTER_DOT_REAL_START_OFFSET")
     }
 
+    private val declarationKeywords = TokenSet.create(KtTokens.FUN_KEYWORD, KtTokens.VAL_KEYWORD, KtTokens.VAR_KEYWORD)
+    private val declarationTokens = TokenSet.orSet(TokenSet.create(KtTokens.IDENTIFIER, KtTokens.LT, KtTokens.GT,
+                                                                   KtTokens.COMMA, KtTokens.DOT, KtTokens.QUEST, KtTokens.COLON,
+                                                                   KtTokens.IN_KEYWORD, KtTokens.OUT_KEYWORD,
+                                                                   KtTokens.LPAR, KtTokens.RPAR, KtTokens.ARROW,
+                                                                   TokenType.ERROR_ELEMENT),
+                                                   KtTokens.WHITE_SPACE_OR_COMMENT_BIT_SET)
+
+    private val callTypeArgsTokens = TokenSet.orSet(TokenSet.create(KtTokens.IDENTIFIER, KtTokens.LT, KtTokens.GT,
+                                                                    KtTokens.COMMA, KtTokens.DOT, KtTokens.QUEST, KtTokens.COLON,
+                                                                    KtTokens.LPAR, KtTokens.RPAR, KtTokens.ARROW),
+                                                    KtTokens.WHITE_SPACE_OR_COMMENT_BIT_SET)
+
     init {
         val provider = object : CompletionProvider<CompletionParameters>() {
             override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext, result: CompletionResultSet) {
@@ -188,14 +201,6 @@ class KotlinCompletionContributor : CompletionContributor() {
             null
 
     }
-
-    private val declarationKeywords = TokenSet.create(KtTokens.FUN_KEYWORD, KtTokens.VAL_KEYWORD, KtTokens.VAR_KEYWORD)
-    private val declarationTokens = TokenSet.orSet(TokenSet.create(KtTokens.IDENTIFIER, KtTokens.LT, KtTokens.GT,
-                                                                   KtTokens.COMMA, KtTokens.DOT, KtTokens.QUEST, KtTokens.COLON,
-                                                                   KtTokens.IN_KEYWORD, KtTokens.OUT_KEYWORD,
-                                                                   KtTokens.LPAR, KtTokens.RPAR, KtTokens.ARROW,
-                                                                   TokenType.ERROR_ELEMENT),
-                                                   KtTokens.WHITE_SPACE_OR_COMMENT_BIT_SET)
 
     private fun specialExtensionReceiverDummyIdentifier(tokenBefore: PsiElement?): String? {
         var token = tokenBefore ?: return null
@@ -407,11 +412,6 @@ class KotlinCompletionContributor : CompletionContributor() {
             return Pair(pair.first, pair.second + 1)
         }
     }
-
-    private val callTypeArgsTokens = TokenSet.orSet(TokenSet.create(KtTokens.IDENTIFIER, KtTokens.LT, KtTokens.GT,
-                                                                   KtTokens.COMMA, KtTokens.DOT, KtTokens.QUEST, KtTokens.COLON,
-                                                                   KtTokens.LPAR, KtTokens.RPAR, KtTokens.ARROW),
-                                                   KtTokens.WHITE_SPACE_OR_COMMENT_BIT_SET)
 
     // if the leaf could be located inside type argument list of a call (if parsed properly)
     // then it returns the call name reference this type argument list would belong to

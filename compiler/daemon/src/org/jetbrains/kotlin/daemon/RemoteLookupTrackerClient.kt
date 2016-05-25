@@ -27,10 +27,10 @@ import org.jetbrains.kotlin.incremental.components.ScopeKind
 
 
 class RemoteLookupTrackerClient(val facade: CompilerCallbackServicesFacade, eventManger: EventManger, val profiler: Profiler = DummyProfiler()) : LookupTracker {
-    private val isDoNothing = profiler.withMeasure(this) { facade.lookupTracker_isDoNothing() }
-
     private val lookups = hashSetOf<LookupInfo>()
     private val interner = StringInterner()
+
+    private val isDoNothing = profiler.withMeasure(this) { facade.lookupTracker_isDoNothing() }
 
     override val requiresPosition: Boolean = profiler.withMeasure(this) { facade.lookupTracker_requiresPosition() }
 

@@ -62,7 +62,6 @@ class FunctionClassDescriptor(
     }
 
     private val typeConstructor = FunctionTypeConstructor()
-    private val memberScope = FunctionClassScope(storageManager, this)
 
     private val parameters: List<TypeParameterDescriptor>
 
@@ -83,6 +82,8 @@ class FunctionClassDescriptor(
 
         parameters = result.toReadOnlyList()
     }
+
+    private val memberScope = FunctionClassScope(storageManager, this)
 
     override fun getContainingDeclaration() = containingDeclaration
 

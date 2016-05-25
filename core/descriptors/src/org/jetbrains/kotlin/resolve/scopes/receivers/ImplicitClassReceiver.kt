@@ -32,7 +32,7 @@ open class ImplicitClassReceiver(override val classDescriptor: ClassDescriptor) 
 
     override fun getType() = classDescriptor.defaultType
 
-    override val declarationDescriptor = classDescriptor
+    override val declarationDescriptor: ClassDescriptor get() = classDescriptor
 
     override fun equals(other: Any?) = classDescriptor == (other as? ImplicitClassReceiver)?.classDescriptor
 

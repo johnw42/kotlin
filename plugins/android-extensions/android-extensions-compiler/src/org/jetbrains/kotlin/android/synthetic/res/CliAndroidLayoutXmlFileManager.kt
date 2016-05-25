@@ -32,6 +32,11 @@ class CliAndroidLayoutXmlFileManager(
 ) : AndroidLayoutXmlFileManager(project) {
     private companion object {
         val LOG = Logger.getInstance(CliAndroidLayoutXmlFileManager::class.java)
+        private fun initSAX(): SAXParser {
+            val saxFactory = SAXParserFactory.newInstance()
+            saxFactory.isNamespaceAware = true
+            return saxFactory.newSAXParser()
+        }
     }
 
     override val androidModule = AndroidModule(applicationPackage, variants)
@@ -55,12 +60,6 @@ class CliAndroidLayoutXmlFileManager(
         }
 
         return resources
-    }
-
-    private fun initSAX(): SAXParser {
-        val saxFactory = SAXParserFactory.newInstance()
-        saxFactory.isNamespaceAware = true
-        return saxFactory.newSAXParser()
     }
 
 }

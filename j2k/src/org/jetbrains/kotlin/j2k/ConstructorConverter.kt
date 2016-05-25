@@ -29,7 +29,7 @@ class ConstructorConverter(
 ) {
     private val constructors = psiClass.constructors.asList()
 
-    private val toTargetConstructorMap = buildToTargetConstructorMap()
+    private val toTargetConstructorMap = buildToTargetConstructorMap(constructors)
 
     private val primaryConstructor: PsiMethod? = when (constructors.size) {
         0 -> null
@@ -43,30 +43,6 @@ class ConstructorConverter(
         val primary = candidates.single()
         if (toTargetConstructorMap.values.any() { it != primary }) return null // all other constructors call our candidate (directly or indirectly)
         return primary
-    }
-
-    private fun buildToTargetConstructorMap(): Map<PsiMethod, PsiMethod> {
-        val toTargetConstructorMap = HashMap<PsiMethod, PsiMethod>()
-        for (constructor in constructors) {
-            val firstStatement = constructor.body?.statements?.firstOrNull()
-            val methodCall = (firstStatement as? PsiExpressionStatement)?.expression as? PsiMethodCallExpression
-            if (methodCall != null) {
-                val refExpr = methodCall.methodExpression
-                if (refExpr.canonicalText == "this") {
-                    val target = refExpr.resolve() as? PsiMethod
-                    if (target != null && target.isConstructor) {
-                        val finalTarget = toTargetConstructorMap[target] ?: target
-                        toTargetConstructorMap[constructor] = finalTarget
-                        for (entry in toTargetConstructorMap.entries) {
-                            if (entry.value == constructor) {
-                                entry.setValue(finalTarget)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return toTargetConstructorMap
     }
 
     var baseClassParams: List<DeferredElement<Expression>>? = if (constructors.isEmpty()) emptyList() else null
@@ -268,6 +244,32 @@ class ConstructorConverter(
             }
 
             return null
+        }
+    }
+
+    companion object {
+        private fun buildToTargetConstructorMap(constructors: List<PsiMethod>): Map<PsiMethod, PsiMethod> {
+            val toTargetConstructorMap = HashMap<PsiMethod, PsiMethod>()
+            for (constructor in constructors) {
+                val firstStatement = constructor.body?.statements?.firstOrNull()
+                val methodCall = (firstStatement as? PsiExpressionStatement)?.expression as? PsiMethodCallExpression
+                if (methodCall != null) {
+                    val refExpr = methodCall.methodExpression
+                    if (refExpr.canonicalText == "this") {
+                        val target = refExpr.resolve() as? PsiMethod
+                        if (target != null && target.isConstructor) {
+                            val finalTarget = toTargetConstructorMap[target] ?: target
+                            toTargetConstructorMap[constructor] = finalTarget
+                            for (entry in toTargetConstructorMap.entries) {
+                                if (entry.value == constructor) {
+                                    entry.setValue(finalTarget)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return toTargetConstructorMap
         }
     }
 }

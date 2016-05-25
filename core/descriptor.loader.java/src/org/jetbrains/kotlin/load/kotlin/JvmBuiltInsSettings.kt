@@ -62,7 +62,7 @@ open class JvmBuiltInsSettings(
 
     private val ownerModuleDescriptor: ModuleDescriptor by lazy(deferredOwnerModuleDescriptor)
 
-    private val mockSerializableType = createMockJavaIoSerializableType()
+    private val mockSerializableType = createMockJavaIoSerializableType(moduleDescriptor)
 
     private val javaAnalogueClassesWithCustomSupertypeCache = storageManager.createCacheWithNotNullValues<FqName, ClassDescriptor>()
 
@@ -71,26 +71,6 @@ open class JvmBuiltInsSettings(
         moduleDescriptor.builtIns.createDeprecatedAnnotation(
                 "This member is not fully supported by Kotlin compiler, so it may be absent or have different signature in next major version"
         ).let { AnnotationsImpl(listOf(it)) }
-    }
-
-    private fun createMockJavaIoSerializableType(): KotlinType {
-        val mockJavaIoPackageFragment = object : PackageFragmentDescriptorImpl(moduleDescriptor, FqName("java.io")) {
-            override fun getMemberScope() = MemberScope.Empty
-        }
-
-        //NOTE: can't reference anyType right away, because this is sometimes called when JvmBuiltIns are initializing
-        val superTypes = listOf(object : DelegatingType() {
-            override fun getDelegate(): KotlinType {
-                return moduleDescriptor.builtIns.anyType
-            }
-        })
-
-        val mockSerializableClass = ClassDescriptorImpl(
-                mockJavaIoPackageFragment, Name.identifier("Serializable"), Modality.ABSTRACT, ClassKind.INTERFACE, superTypes, SourceElement.NO_SOURCE
-        )
-
-        mockSerializableClass.initialize(MemberScope.Empty, emptySet(), null)
-        return mockSerializableClass.defaultType
     }
 
     override fun getSupertypes(classDescriptor: DeserializedClassDescriptor): Collection<KotlinType> {
@@ -434,6 +414,26 @@ open class JvmBuiltInsSettings(
                     inJavaLang(it.wrapperFqName.shortName().asString(), *constructors("Ljava/lang/String;"))
                 }
             }
+
+        private fun createMockJavaIoSerializableType(moduleDescriptor: ModuleDescriptor): KotlinType {
+            val mockJavaIoPackageFragment = object : PackageFragmentDescriptorImpl(moduleDescriptor, FqName("java.io")) {
+                override fun getMemberScope() = MemberScope.Empty
+            }
+
+            //NOTE: can't reference anyType right away, because this is sometimes called when JvmBuiltIns are initializing
+            val superTypes = listOf(object : DelegatingType() {
+                override fun getDelegate(): KotlinType {
+                    return moduleDescriptor.builtIns.anyType
+                }
+            })
+
+            val mockSerializableClass = ClassDescriptorImpl(
+                    mockJavaIoPackageFragment, Name.identifier("Serializable"), Modality.ABSTRACT, ClassKind.INTERFACE, superTypes, SourceElement.NO_SOURCE
+            )
+
+            mockSerializableClass.initialize(MemberScope.Empty, emptySet(), null)
+            return mockSerializableClass.defaultType
+        }
     }
 }
 

@@ -152,10 +152,10 @@ class DescriptorKindFilter(
                     if (isOneBitMask) MaskToName(mask, field.name) else null
                 }
                 .toReadOnlyList()
-
-        private inline fun <reified T : Any> staticFields() = T::class.java.fields.filter { Modifier.isStatic(it.modifiers) }
     }
 }
+
+private inline fun <reified T : Any> staticFields() = T::class.java.fields.filter { Modifier.isStatic(it.modifiers) }
 
 abstract class DescriptorKindExclude {
     abstract fun excludes(descriptor: DeclarationDescriptor): Boolean

@@ -40,6 +40,7 @@ abstract class KtCodeFragment(
 
     private var viewProvider = super.getViewProvider() as SingleRootFileViewProvider
     private var imports = LinkedHashSet<String>()
+    private var isPhysical = true
 
     init {
         getViewProvider().forceCachedPsi(this)
@@ -53,8 +54,6 @@ abstract class KtCodeFragment(
     private var thisType: PsiType? = null
     private var superType: PsiType? = null
     private var exceptionHandler: JavaCodeFragment.ExceptionHandler? = null
-    private var isPhysical = true
-
     abstract fun getContentElement(): KtElement?
 
     override fun forceResolveScope(scope: GlobalSearchScope?) {
