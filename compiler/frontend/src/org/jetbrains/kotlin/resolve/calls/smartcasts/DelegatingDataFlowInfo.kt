@@ -287,12 +287,12 @@ internal class DelegatingDataFlowInfo private constructor(
 
     companion object {
         private val EMPTY_NULLABILITY_INFO = ImmutableMap.of<DataFlowValue, Nullability>()
-        private val EMPTY_TYPE_INFO = newTypeInfo()
+        private val EMPTY_TYPE_INFO = emptyTypeInfo()
 
         private fun containsAll(first: SetMultimap<DataFlowValue, KotlinType>, second: SetMultimap<DataFlowValue, KotlinType>) =
                 first.entries().containsAll(second.entries())
 
-        fun newTypeInfo(): SetMultimap<DataFlowValue, KotlinType> = LinkedHashMultimap.create<DataFlowValue, KotlinType>()
+        fun newTypeInfo(): SetMultimap<DataFlowValue, KotlinType> = emptyTypeInfo()
 
         private fun create(parent: DataFlowInfo?,
                            nullabilityInfo: ImmutableMap<DataFlowValue, Nullability>,
@@ -319,3 +319,5 @@ internal class DelegatingDataFlowInfo private constructor(
         }
     }
 }
+
+private fun emptyTypeInfo(): SetMultimap<DataFlowValue, KotlinType> = LinkedHashMultimap.create<DataFlowValue, KotlinType>()

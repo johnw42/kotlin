@@ -30,10 +30,10 @@ import java.util.ArrayList
 import java.util.HashMap
 
 class PseudocodeVariableDataCollector(
-        private val bindingContext: BindingContext,
+        bindingContext: BindingContext,
         private val pseudocode: Pseudocode
 ) {
-    val blockScopeVariableInfo = computeBlockScopeVariableInfo(pseudocode)
+    val blockScopeVariableInfo = computeBlockScopeVariableInfo(pseudocode, bindingContext)
 
     fun <I : ControlFlowInfo<*>> collectData(
             traversalOrder: TraversalOrder,
@@ -69,27 +69,29 @@ class PseudocodeVariableDataCollector(
         } as I
     }
 
-    fun computeBlockScopeVariableInfo(pseudocode: Pseudocode): BlockScopeVariableInfo {
-        val blockScopeVariableInfo = BlockScopeVariableInfoImpl()
-        pseudocode.traverse(TraversalOrder.FORWARD, { instruction ->
-            if (instruction is VariableDeclarationInstruction) {
-                val variableDeclarationElement = instruction.variableDeclarationElement
-                val descriptor = bindingContext.get(BindingContext.DECLARATION_TO_DESCRIPTOR, variableDeclarationElement)
-                if (descriptor != null) {
-                    // TODO: investigate why tests fail without this eager computation here
-                    descriptor.toString()
+    companion object {
+        fun computeBlockScopeVariableInfo(pseudocode: Pseudocode, bindingContext: BindingContext): BlockScopeVariableInfo {
+            val blockScopeVariableInfo = BlockScopeVariableInfoImpl()
+            pseudocode.traverse(TraversalOrder.FORWARD, { instruction ->
+                if (instruction is VariableDeclarationInstruction) {
+                    val variableDeclarationElement = instruction.variableDeclarationElement
+                    val descriptor = bindingContext.get(BindingContext.DECLARATION_TO_DESCRIPTOR, variableDeclarationElement)
+                    if (descriptor != null) {
+                        // TODO: investigate why tests fail without this eager computation here
+                        descriptor.toString()
 
-                    assert(descriptor is VariableDescriptor) {
-                        "Variable descriptor should correspond to the instruction for ${instruction.element.text}.\n" +
-                        "Descriptor: $descriptor"
+                        assert(descriptor is VariableDescriptor) {
+                            "Variable descriptor should correspond to the instruction for ${instruction.element.text}.\n" +
+                            "Descriptor: $descriptor"
+                        }
+                        blockScopeVariableInfo.registerVariableDeclaredInScope(
+                                descriptor as VariableDescriptor, instruction.blockScope
+                        )
                     }
-                    blockScopeVariableInfo.registerVariableDeclaredInScope(
-                            descriptor as VariableDescriptor, instruction.blockScope
-                    )
                 }
-            }
-        })
-        return blockScopeVariableInfo
+            })
+            return blockScopeVariableInfo
+        }
     }
 }
 

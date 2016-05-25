@@ -40,10 +40,6 @@ class LazyScriptDescriptor(
         name,
         scriptInfo
 ) {
-    init {
-        resolveSession.trace.record(BindingContext.SCRIPT, scriptInfo.script, this)
-    }
-
     private val sourceElement = scriptInfo.script.toSourceElement()
 
     override fun getSource() = sourceElement
@@ -51,6 +47,10 @@ class LazyScriptDescriptor(
     private val priority: Int = ScriptPriorities.getScriptPriority(scriptInfo.script)
 
     override fun getPriority() = priority
+
+    init {
+        resolveSession.trace.record(BindingContext.SCRIPT, scriptInfo.script, this)
+    }
 
     override fun substitute(substitutor: TypeSubstitutor) = this
 

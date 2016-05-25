@@ -112,70 +112,74 @@ object ModifierCheckerCore {
 
     val deprecatedParentTargetMap = mapOf<KtModifierKeywordToken, Set<KotlinTarget>>()
 
+    private val MODIFIER_KEYWORD_SET = TokenSet.orSet(KtTokens.SOFT_KEYWORDS, TokenSet.create(KtTokens.IN_KEYWORD))
+
     // First modifier in pair should be also first in declaration
-    private val mutualCompatibility = buildCompatibilityMap()
+    private val mutualCompatibility = Builder.buildCompatibilityMap()
 
-    private fun buildCompatibilityMap(): Map<Pair<KtModifierKeywordToken, KtModifierKeywordToken>, Compatibility> {
-        val result = hashMapOf<Pair<KtModifierKeywordToken, KtModifierKeywordToken>, Compatibility>()
-        // Variance: in + out are incompatible
-        result += incompatibilityRegister(IN_KEYWORD, OUT_KEYWORD)
-        // Visibilities: incompatible
-        result += incompatibilityRegister(PRIVATE_KEYWORD, PROTECTED_KEYWORD, PUBLIC_KEYWORD, INTERNAL_KEYWORD)
-        // Abstract + open + final + sealed: incompatible
-        result += incompatibilityRegister(ABSTRACT_KEYWORD, OPEN_KEYWORD, FINAL_KEYWORD, SEALED_KEYWORD)
-        // data + open, data + inner, data + abstract, data + sealed
-        result += incompatibilityRegister(DATA_KEYWORD, OPEN_KEYWORD)
-        result += incompatibilityRegister(DATA_KEYWORD, INNER_KEYWORD)
-        result += incompatibilityRegister(DATA_KEYWORD, ABSTRACT_KEYWORD)
-        result += incompatibilityRegister(DATA_KEYWORD, SEALED_KEYWORD)
-        // open is redundant to abstract & override
-        result += redundantRegister(ABSTRACT_KEYWORD, OPEN_KEYWORD)
-        // abstract is redundant to sealed
-        result += redundantRegister(SEALED_KEYWORD, ABSTRACT_KEYWORD)
+    private object Builder {
+        fun buildCompatibilityMap(): Map<Pair<KtModifierKeywordToken, KtModifierKeywordToken>, Compatibility> {
+            val result = hashMapOf<Pair<KtModifierKeywordToken, KtModifierKeywordToken>, Compatibility>()
+            // Variance: in + out are incompatible
+            result += incompatibilityRegister(IN_KEYWORD, OUT_KEYWORD)
+            // Visibilities: incompatible
+            result += incompatibilityRegister(PRIVATE_KEYWORD, PROTECTED_KEYWORD, PUBLIC_KEYWORD, INTERNAL_KEYWORD)
+            // Abstract + open + final + sealed: incompatible
+            result += incompatibilityRegister(ABSTRACT_KEYWORD, OPEN_KEYWORD, FINAL_KEYWORD, SEALED_KEYWORD)
+            // data + open, data + inner, data + abstract, data + sealed
+            result += incompatibilityRegister(DATA_KEYWORD, OPEN_KEYWORD)
+            result += incompatibilityRegister(DATA_KEYWORD, INNER_KEYWORD)
+            result += incompatibilityRegister(DATA_KEYWORD, ABSTRACT_KEYWORD)
+            result += incompatibilityRegister(DATA_KEYWORD, SEALED_KEYWORD)
+            // open is redundant to abstract & override
+            result += redundantRegister(ABSTRACT_KEYWORD, OPEN_KEYWORD)
+            // abstract is redundant to sealed
+            result += redundantRegister(SEALED_KEYWORD, ABSTRACT_KEYWORD)
 
-        // const is incompatible with abstract, open, override
-        result += incompatibilityRegister(CONST_KEYWORD, ABSTRACT_KEYWORD)
-        result += incompatibilityRegister(CONST_KEYWORD, OPEN_KEYWORD)
-        result += incompatibilityRegister(CONST_KEYWORD, OVERRIDE_KEYWORD)
+            // const is incompatible with abstract, open, override
+            result += incompatibilityRegister(CONST_KEYWORD, ABSTRACT_KEYWORD)
+            result += incompatibilityRegister(CONST_KEYWORD, OPEN_KEYWORD)
+            result += incompatibilityRegister(CONST_KEYWORD, OVERRIDE_KEYWORD)
 
-        // private is incompatible with override
-        result += incompatibilityRegister(PRIVATE_KEYWORD, OVERRIDE_KEYWORD)
-        // private is compatible with open / abstract only for classes
-        result += compatibilityForClassesRegister(PRIVATE_KEYWORD, OPEN_KEYWORD)
-        result += compatibilityForClassesRegister(PRIVATE_KEYWORD, ABSTRACT_KEYWORD)
+            // private is incompatible with override
+            result += incompatibilityRegister(PRIVATE_KEYWORD, OVERRIDE_KEYWORD)
+            // private is compatible with open / abstract only for classes
+            result += compatibilityForClassesRegister(PRIVATE_KEYWORD, OPEN_KEYWORD)
+            result += compatibilityForClassesRegister(PRIVATE_KEYWORD, ABSTRACT_KEYWORD)
 
-        result += incompatibilityRegister(CROSSINLINE_KEYWORD, NOINLINE_KEYWORD)
-        return result
-    }
+            result += incompatibilityRegister(CROSSINLINE_KEYWORD, NOINLINE_KEYWORD)
+            return result
+        }
 
-    private fun redundantRegister(
-            sufficient: KtModifierKeywordToken,
-            redundant: KtModifierKeywordToken
-    ): Map<Pair<KtModifierKeywordToken, KtModifierKeywordToken>, Compatibility> {
-        return mapOf(Pair(sufficient, redundant) to Compatibility.REDUNDANT,
-                     Pair(redundant, sufficient) to Compatibility.REVERSE_REDUNDANT)
-    }
+        private fun redundantRegister(
+                sufficient: KtModifierKeywordToken,
+                redundant: KtModifierKeywordToken
+        ): Map<Pair<KtModifierKeywordToken, KtModifierKeywordToken>, Compatibility> {
+            return mapOf(Pair(sufficient, redundant) to Compatibility.REDUNDANT,
+                         Pair(redundant, sufficient) to Compatibility.REVERSE_REDUNDANT)
+        }
 
-    private fun compatibilityRegister(
-            compatibility: Compatibility, vararg list: KtModifierKeywordToken
-    ): Map<Pair<KtModifierKeywordToken, KtModifierKeywordToken>, Compatibility> {
-        val result = hashMapOf<Pair<KtModifierKeywordToken, KtModifierKeywordToken>, Compatibility>()
-        for (first in list) {
-            for (second in list) {
-                if (first != second) {
-                    result[Pair(first, second)] = compatibility
+        private fun compatibilityRegister(
+                compatibility: Compatibility, vararg list: KtModifierKeywordToken
+        ): Map<Pair<KtModifierKeywordToken, KtModifierKeywordToken>, Compatibility> {
+            val result = hashMapOf<Pair<KtModifierKeywordToken, KtModifierKeywordToken>, Compatibility>()
+            for (first in list) {
+                for (second in list) {
+                    if (first != second) {
+                        result[Pair(first, second)] = compatibility
+                    }
                 }
             }
+            return result
         }
-        return result
+
+        private fun compatibilityForClassesRegister(vararg list: KtModifierKeywordToken) =
+                compatibilityRegister(Compatibility.COMPATIBLE_FOR_CLASSES_ONLY, *list)
+
+        private fun incompatibilityRegister(vararg list: KtModifierKeywordToken) = compatibilityRegister(Compatibility.INCOMPATIBLE, *list)
+
+        private fun deprecationRegister(vararg list: KtModifierKeywordToken) = compatibilityRegister(Compatibility.DEPRECATED, *list)
     }
-
-    private fun compatibilityForClassesRegister(vararg list: KtModifierKeywordToken) =
-            compatibilityRegister(Compatibility.COMPATIBLE_FOR_CLASSES_ONLY, *list)
-
-    private fun incompatibilityRegister(vararg list: KtModifierKeywordToken) = compatibilityRegister(Compatibility.INCOMPATIBLE, *list)
-
-    private fun deprecationRegister(vararg list: KtModifierKeywordToken) = compatibilityRegister(Compatibility.DEPRECATED, *list)
 
     private fun compatibility(first: KtModifierKeywordToken, second: KtModifierKeywordToken): Compatibility {
         if (first == second) {
@@ -259,8 +263,6 @@ object ModifierCheckerCore {
         trace.report(Errors.WRONG_MODIFIER_CONTAINING_DECLARATION.on(node.psi, modifier, actualParents.firstOrNull()?.description ?: "this scope"))
         return false
     }
-
-    private val MODIFIER_KEYWORD_SET = TokenSet.orSet(KtTokens.SOFT_KEYWORDS, TokenSet.create(KtTokens.IN_KEYWORD))
 
     private fun checkModifierList(list: KtModifierList, trace: BindingTrace, parentDescriptor: DeclarationDescriptor?, actualTargets: List<KotlinTarget>) {
         // It's a list of all nodes with error already reported

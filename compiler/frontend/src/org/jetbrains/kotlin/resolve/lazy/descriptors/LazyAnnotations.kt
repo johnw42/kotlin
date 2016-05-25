@@ -113,10 +113,6 @@ class LazyAnnotationDescriptor(
         val annotationEntry: KtAnnotationEntry
 ) : AnnotationDescriptor, LazyEntity {
 
-    init {
-        c.trace.record(BindingContext.ANNOTATION, annotationEntry, this)
-    }
-
     private val type = c.storageManager.createLazyValue {
         c.annotationResolver.resolveAnnotationType(
                 scope,
@@ -135,6 +131,10 @@ class LazyAnnotationDescriptor(
         LexicalScope.Companion.empty(c.scope, FileDescriptorForVisibilityChecks(source, c.scope.ownerDescriptor))
     } else {
         c.scope
+    }
+
+    init {
+        c.trace.record(BindingContext.ANNOTATION, annotationEntry, this)
     }
 
     override fun getType() = type()
