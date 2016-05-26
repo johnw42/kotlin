@@ -16,31 +16,33 @@
 
 package org.jetbrains.kotlin.config
 
-// Note: names of these parameters are also used in diagnostic tests
-class LanguageFeatureSettings(
-        val typeAliases: Boolean = true,
-        val localDelegatedProperties: Boolean = true,
-        val topLevelSealedInheritance: Boolean = true
-) {
-    companion object {
-        private val SETTINGS = mapOf(
-                "1.0" to LanguageFeatureSettings(
-                        typeAliases = false,
-                        localDelegatedProperties = false,
-                        topLevelSealedInheritance = false
-                ),
-                "1.1" to LanguageFeatureSettings()
-        )
+import org.jetbrains.kotlin.config.LanguageVersion.KOTLIN_1_1
 
-        private val LATEST_VERSION = "1.1"
+
+enum class LanguageFeature(val sinceVersion: LanguageVersion) {
+    TypeAliases(KOTLIN_1_1),
+    LocalDelegatedProperties(KOTLIN_1_1),
+    TopLevelSealedInheritance(KOTLIN_1_1)
+}
+
+// Note: names of these parameters are also used in diagnostic tests
+enum class LanguageVersion(val versionString: String): LanguageFeatureSettings {
+    KOTLIN_1_0("1.0"),
+    KOTLIN_1_1("1.1");
+
+    override fun supportsFeature(feature: LanguageFeature): Boolean {
+        return feature.sinceVersion.ordinal >= this.ordinal
+    }
+
+    companion object {
+        @JvmStatic
+        fun fromVersionString(str: String) = values().find { it.versionString == str }
 
         @JvmField
-        val LATEST: LanguageFeatureSettings = fromLanguageVersion(LATEST_VERSION)!!
-
-        @JvmStatic
-        fun fromLanguageVersion(source: String): LanguageFeatureSettings? = SETTINGS[source]
-
-        @JvmStatic
-        fun getAllLanguageVersions(): List<String> = SETTINGS.keys.toList()
+        val LATEST = values().last()
     }
+}
+
+interface LanguageFeatureSettings {
+    fun supportsFeature(feature: LanguageFeature): Boolean
 }

@@ -20,7 +20,7 @@ public class CommonConfigurationKeys {
     private CommonConfigurationKeys() {
     }
 
-    public static final CompilerConfigurationKey<LanguageFeatureSettings> LANGUAGE_FEATURE_SETTINGS =
+    public static final CompilerConfigurationKey<LanguageFeatureSettings> LANGUAGE_VERSION =
             CompilerConfigurationKey.create("language feature settings");
 
     public static final CompilerConfigurationKey<Boolean> DISABLE_INLINE =

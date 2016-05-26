@@ -269,7 +269,7 @@ public abstract class AbstractDiagnosticsTest extends BaseDiagnosticsTest {
         CompilerConfiguration configuration;
         if (languageFeatureSettings != null) {
             configuration = getEnvironment().getConfiguration().copy();
-            configuration.put(CommonConfigurationKeys.LANGUAGE_FEATURE_SETTINGS, languageFeatureSettings);
+            configuration.put(CommonConfigurationKeys.LANGUAGE_VERSION, languageFeatureSettings);
         }
         else {
             configuration = getEnvironment().getConfiguration();
