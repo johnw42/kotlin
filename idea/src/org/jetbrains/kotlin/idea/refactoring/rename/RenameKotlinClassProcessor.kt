@@ -38,6 +38,8 @@ class RenameKotlinClassProcessor : RenameKotlinPsiProcessor() {
     override fun substituteElementToRename(element: PsiElement, editor: Editor?) = getKtClassOrObject(element)
 
     override fun prepareRenaming(element: PsiElement, newName: String, allRenames: MutableMap<PsiElement, String>) {
+        super.prepareRenaming(element, newName, allRenames)
+
         val classOrObject = getKtClassOrObject(element) as? KtClassOrObject ?: return
 
         val file = classOrObject.getContainingKtFile()
