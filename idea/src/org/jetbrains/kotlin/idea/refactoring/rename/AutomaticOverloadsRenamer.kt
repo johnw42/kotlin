@@ -24,10 +24,14 @@ import com.intellij.refactoring.RefactoringBundle
 import com.intellij.refactoring.rename.naming.AutomaticRenamer
 import com.intellij.refactoring.rename.naming.AutomaticRenamerFactory
 import com.intellij.usageView.UsageInfo
+import org.jetbrains.kotlin.idea.caches.resolve.getResolutionFacade
 import org.jetbrains.kotlin.idea.stubindex.KotlinTopLevelFunctionFqnNameIndex
+import org.jetbrains.kotlin.idea.util.getAllAccessibleFunctions
+import org.jetbrains.kotlin.idea.util.getResolutionScope
 import org.jetbrains.kotlin.psi.KtClassBody
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtNamedFunction
+import org.jetbrains.kotlin.resolve.lazy.BodyResolveMode
 
 class AutomaticOverloadsRenamer(function: KtNamedFunction, newName: String) : AutomaticRenamer() {
     init {
@@ -63,8 +67,16 @@ private fun KtNamedFunction.getOverloads(): Collection<KtNamedFunction> {
 
 class AutomaticOverloadsRenamerFactory : AutomaticRenamerFactory {
     override fun isApplicable(element: PsiElement): Boolean {
-        return element is KtNamedFunction && element.name != null
-               && (element.parent is KtFile || element.parent is KtClassBody)
+        if (element !is KtNamedFunction) return false
+        if (element.isLocal) return false
+
+        val name = element.nameAsName ?: return false
+
+        val resolutionFacade = element.getResolutionFacade()
+        val context = resolutionFacade.analyze(element, BodyResolveMode.FULL)
+        val scope = element.getResolutionScope(context, resolutionFacade)
+
+        return scope.getAllAccessibleFunctions(name).size > 1
     }
 
     override fun getOptionName() = RefactoringBundle.message("rename.overloads")
