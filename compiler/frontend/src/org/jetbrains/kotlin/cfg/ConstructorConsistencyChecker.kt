@@ -38,6 +38,8 @@ sealed class LeakingThisDescriptor {
     class NonFinalClass(val klass: ClassDescriptor): LeakingThisDescriptor()
 
     class NonFinalProperty(val property: PropertyDescriptor): LeakingThisDescriptor()
+
+    class NonFinalFunction(val function: FunctionDescriptor): LeakingThisDescriptor()
 }
 
 class ConstructorConsistencyChecker private constructor(declaration: KtDeclaration, private val trace: BindingTrace) {
@@ -97,6 +99,10 @@ class ConstructorConsistencyChecker private constructor(declaration: KtDeclarati
             if (descriptor is FunctionDescriptor) {
                 val containingDescriptor = descriptor.containingDeclaration
                 if (containingDescriptor != classDescriptor) return true
+                if (!finalClass && descriptor.isOverridable) {
+                    trace.record(BindingContext.LEAKING_THIS, callee, LeakingThisDescriptor.NonFinalFunction(descriptor))
+                    return true
+                }
             }
         }
         return false
