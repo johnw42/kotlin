@@ -58,11 +58,11 @@ class DeserializedSimpleFunctionDescriptor(
             kind: CallableMemberDescriptor.Kind,
             newName: Name?,
             annotations: Annotations,
-            preserveSource: Boolean
+            source: SourceElement
     ): FunctionDescriptorImpl {
         return DeserializedSimpleFunctionDescriptor(
                 newOwner, original as SimpleFunctionDescriptor?, annotations, newName ?: name, kind,
-                proto, nameResolver, typeTable, containerSource
+                proto, nameResolver, typeTable, source
         )
     }
 }
@@ -119,11 +119,11 @@ class DeserializedConstructorDescriptor(
             kind: CallableMemberDescriptor.Kind,
             newName: Name?,
             annotations: Annotations,
-            preserveSource: Boolean
+            source: SourceElement
     ): DeserializedConstructorDescriptor {
         return DeserializedConstructorDescriptor(
                 newOwner as ClassDescriptor, original as ConstructorDescriptor?, annotations, isPrimary, kind,
-                proto, nameResolver, typeTable, containerSource
+                proto, nameResolver, typeTable, source
         )
     }
 
