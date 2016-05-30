@@ -7816,6 +7816,12 @@ public class BlackBoxCodegenTestGenerated extends AbstractBlackBoxCodegenTest {
             doTest(fileName);
         }
 
+        @TestMetadata("closureOfLambdaInLocalClass.kt")
+        public void testClosureOfLambdaInLocalClass() throws Exception {
+            String fileName = KotlinTestUtils.navigationMetadata("compiler/testData/codegen/box/localClasses/closureOfLambdaInLocalClass.kt");
+            doTest(fileName);
+        }
+
         @TestMetadata("inExtensionFunction.kt")
         public void testInExtensionFunction() throws Exception {
             String fileName = KotlinTestUtils.navigationMetadata("compiler/testData/codegen/box/localClasses/inExtensionFunction.kt");
@@ -7933,6 +7939,12 @@ public class BlackBoxCodegenTestGenerated extends AbstractBlackBoxCodegenTest {
         @TestMetadata("object.kt")
         public void testObject() throws Exception {
             String fileName = KotlinTestUtils.navigationMetadata("compiler/testData/codegen/box/localClasses/object.kt");
+            doTest(fileName);
+        }
+
+        @TestMetadata("ownClosureOfInnerLocalClass.kt")
+        public void testOwnClosureOfInnerLocalClass() throws Exception {
+            String fileName = KotlinTestUtils.navigationMetadata("compiler/testData/codegen/box/localClasses/ownClosureOfInnerLocalClass.kt");
             doTest(fileName);
         }
 
