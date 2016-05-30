@@ -48,6 +48,7 @@ import org.jetbrains.kotlin.resolve.jvm.jvmSignature.JvmMethodParameterKind;
 import org.jetbrains.kotlin.resolve.jvm.jvmSignature.JvmMethodParameterSignature;
 import org.jetbrains.kotlin.resolve.jvm.jvmSignature.JvmMethodSignature;
 import org.jetbrains.kotlin.serialization.deserialization.descriptors.DeserializedSimpleFunctionDescriptor;
+import org.jetbrains.kotlin.types.KotlinType;
 import org.jetbrains.kotlin.types.expressions.LabelResolver;
 import org.jetbrains.org.objectweb.asm.Label;
 import org.jetbrains.org.objectweb.asm.MethodVisitor;
@@ -470,7 +471,6 @@ public class InlineCodegen extends CallGenerator {
             boolean isLambda,
             @NotNull ExpressionCodegen codegen,
             @NotNull GenerationState state
-
     ) {
         FakeMemberCodegen parentCodegen =
                 new FakeMemberCodegen(codegen.getParentCodegen(), expression,
@@ -478,21 +478,26 @@ public class InlineCodegen extends CallGenerator {
                                       isLambda ? codegen.getParentCodegen().getClassName()
                                                : state.getTypeMapper().mapImplementationOwner(descriptor).getInternalName());
 
-        FunctionGenerationStrategy strategy =
-                expression instanceof KtCallableReferenceExpression ?
-                new FunctionReferenceGenerationStrategy(
-                        state,
-                        descriptor,
-                        CallUtilKt.getResolvedCallWithAssert(((KtCallableReferenceExpression) expression).getCallableReference(),
-                                                             codegen.getBindingContext()
-                        ),
-                        null /* TODO */
-                ) :
-                new FunctionGenerationStrategy.FunctionDefault(state, descriptor, (KtDeclarationWithBody) expression);
+        FunctionGenerationStrategy strategy;
+        if (expression instanceof KtCallableReferenceExpression) {
+            KtCallableReferenceExpression callableReferenceExpression = (KtCallableReferenceExpression) expression;
+            KtExpression receiverExpression = callableReferenceExpression.getReceiverExpression();
+            KotlinType receiverExpressionType = receiverExpression != null ? codegen.getBindingContext().getType(receiverExpression) : null;
+            Type receiverAsmType = receiverExpressionType != null ? state.getTypeMapper().mapType(receiverExpressionType) : null;
+
+            strategy = new FunctionReferenceGenerationStrategy(
+                    state,
+                    descriptor,
+                    CallUtilKt.getResolvedCallWithAssert(callableReferenceExpression.getCallableReference(), codegen.getBindingContext()),
+                    receiverAsmType
+            );
+        }
+        else {
+            strategy = new FunctionGenerationStrategy.FunctionDefault(state, descriptor, (KtDeclarationWithBody) expression);
+        }
 
         FunctionCodegen.generateMethodBody(
-                adapter, descriptor, context, jvmMethodSignature,
-                strategy,
+                adapter, descriptor, context, jvmMethodSignature, strategy,
                 // Wrapping for preventing marking actual parent codegen as containing reifier markers
                 parentCodegen
         );
