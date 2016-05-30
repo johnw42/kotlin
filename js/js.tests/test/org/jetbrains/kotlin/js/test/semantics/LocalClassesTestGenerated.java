@@ -47,6 +47,12 @@ public class LocalClassesTestGenerated extends AbstractLocalClassesTest {
         doTest(fileName);
     }
 
+    @TestMetadata("closureOfInnerLocalClass.kt")
+    public void testClosureOfInnerLocalClass() throws Exception {
+        String fileName = KotlinTestUtils.navigationMetadata("compiler/testData/codegen/box/localClasses/closureOfInnerLocalClass.kt");
+        doTest(fileName);
+    }
+
     @TestMetadata("closureWithSelfInstantiation.kt")
     public void testClosureWithSelfInstantiation() throws Exception {
         String fileName = KotlinTestUtils.navigationMetadata("compiler/testData/codegen/box/localClasses/closureWithSelfInstantiation.kt");
