@@ -28,6 +28,6 @@ class KotlinDeclarationRenameInputValidator : RenameInputValidator {
     override fun getPattern() = PlatformPatterns.psiElement(KtNamedDeclaration::class.java)
 
     override fun isInputValid(newName: String?, element: PsiElement?, context: ProcessingContext?): Boolean {
-        return newName != null && (KotlinNameSuggester.isIdentifier(newName) || KotlinNameSuggester.isIdentifier(newName.quoteIfNeeded()))
+        return newName != null && KotlinNameSuggester.isIdentifier(newName.quoteIfNeeded())
     }
 }
