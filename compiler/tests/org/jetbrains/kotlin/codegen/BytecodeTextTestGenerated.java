@@ -1106,6 +1106,27 @@ public class BytecodeTextTestGenerated extends AbstractBytecodeTextTest {
         }
     }
 
+    @TestMetadata("compiler/testData/codegen/bytecodeText/stackClean")
+    @TestDataPath("$PROJECT_ROOT")
+    @RunWith(JUnit3RunnerWithInners.class)
+    public static class StackClean extends AbstractBytecodeTextTest {
+        public void testAllFilesPresentInStackClean() throws Exception {
+            KotlinTestUtils.assertAllTestsPresentByMetadata(this.getClass(), new File("compiler/testData/codegen/bytecodeText/stackClean"), Pattern.compile("^(.+)\\.kt$"), true);
+        }
+
+        @TestMetadata("pop3BeforeLReturn.kt")
+        public void testPop3BeforeLReturn() throws Exception {
+            String fileName = KotlinTestUtils.navigationMetadata("compiler/testData/codegen/bytecodeText/stackClean/pop3BeforeLReturn.kt");
+            doTest(fileName);
+        }
+
+        @TestMetadata("popBeforeReturn.kt")
+        public void testPopBeforeReturn() throws Exception {
+            String fileName = KotlinTestUtils.navigationMetadata("compiler/testData/codegen/bytecodeText/stackClean/popBeforeReturn.kt");
+            doTest(fileName);
+        }
+    }
+
     @TestMetadata("compiler/testData/codegen/bytecodeText/statements")
     @TestDataPath("$PROJECT_ROOT")
     @RunWith(JUnit3RunnerWithInners.class)
