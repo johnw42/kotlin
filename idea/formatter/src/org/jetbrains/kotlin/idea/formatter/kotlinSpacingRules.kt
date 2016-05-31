@@ -89,7 +89,13 @@ fun createSpacingBuilder(settings: CodeStyleSettings, builderUtil: KotlinSpacing
         simple {
             // ============ Line breaks ==============
             before(FILE_ANNOTATION_LIST).lineBreakInCode()
-            after(FILE_ANNOTATION_LIST).blankLines(1)
+
+            custom {
+                inPosition(left = FILE_ANNOTATION_LIST).customRule { p, l, r ->
+                    val lineFeeds = if (r.node.findLeafElementAt(0)?.elementType != PACKAGE_KEYWORD) 2 else 1
+                    Spacing.createSpacing(0, 0, lineFeeds, true, 0)
+                }
+            }
 
             after(PACKAGE_DIRECTIVE).blankLines(1)
             between(IMPORT_DIRECTIVE, IMPORT_DIRECTIVE).lineBreakInCode()
