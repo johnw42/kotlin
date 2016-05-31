@@ -7,7 +7,7 @@ class Bar {
 val SOME_BAR: Bar = Bar()
 val BAR: Bar = Bar()
 
-val some_bar: Bar = Bar()
-val bar: Bar = Bar()
+val SOME___BAR: Bar = Bar()
+val BAR: Bar = Bar()
 
-val SomeBar: Bar = Bar()
+val SOME_BAR: Bar = Bar()
