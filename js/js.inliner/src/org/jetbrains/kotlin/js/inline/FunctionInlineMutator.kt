@@ -108,11 +108,7 @@ private constructor(
     }
 
     private fun processReturns() {
-        val resultReference = getResultReference()
-        if (resultReference != null) {
-            resultExpr = resultReference
-        }
-        assert(resultExpr == null || resultExpr is JsNameRef)
+        resultExpr = getResultReference()
 
         val breakName = namingContext.getFreshName(getBreakLabel())
         this.breakLabel = JsLabel(breakName).apply { synthetic = true }

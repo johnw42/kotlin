@@ -194,18 +194,7 @@ public class JsInliner extends JsVisitorWithContextImpl {
             return;
         }
 
-        resultExpression = accept(resultExpression);
-        JsStatement currentStatement = statementContext.getCurrentNode();
-
-        if (currentStatement instanceof JsExpressionStatement &&
-            ((JsExpressionStatement) currentStatement).getExpression() == call &&
-            resultExpression == null
-        ) {
-            statementContext.removeMe();
-        }
-        else {
-            context.replaceMe(resultExpression);
-        }
+        context.replaceMe(accept(resultExpression));
     }
 
     @NotNull
