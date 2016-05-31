@@ -17,15 +17,11 @@
 package org.jetbrains.kotlin.idea.refactoring.rename
 
 import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiReference
 import com.intellij.refactoring.rename.UnresolvableCollisionUsageInfo
 import com.intellij.refactoring.util.MoveRenameUsageInfo
 import com.intellij.usageView.UsageInfo
-import org.jetbrains.kotlin.asJava.KtLightElement
 import org.jetbrains.kotlin.idea.refactoring.KotlinRefactoringBundle
 import org.jetbrains.kotlin.idea.references.AbstractKtReference
-import org.jetbrains.kotlin.idea.references.KtReference
-import org.jetbrains.kotlin.psi.KtElement
 import java.util.*
 
 fun checkConflictsAndReplaceUsageInfos(result: MutableList<UsageInfo>) {
@@ -54,4 +50,3 @@ class UnresolvableConventionViolationUsageInfo(
 ) : UnresolvableCollisionUsageInfo(element, referencedElement) {
     override fun getDescription(): String = KotlinRefactoringBundle.message("naming.convention.will.be.violated.after.rename")
 }
-

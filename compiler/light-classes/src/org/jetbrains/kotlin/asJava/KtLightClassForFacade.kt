@@ -39,6 +39,7 @@ import org.jetbrains.kotlin.psi.KtClassOrObject
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtPsiFactory
 import org.jetbrains.kotlin.psi.KtStringTemplateExpression
+import org.jetbrains.kotlin.psi.psiUtil.siblings
 import javax.swing.Icon
 
 class KtLightClassForFacade private constructor(
@@ -147,17 +148,30 @@ class KtLightClassForFacade private constructor(
     override fun setName(name: String): PsiElement? {
         for (file in files) {
             val jvmNameEntry = JvmFileClassUtil.findAnnotationEntryOnFileNoResolve(file, JvmFileClassUtil.JVM_NAME_SHORT)
+
+            if (PackagePartClassUtils.getFilePartShortName(file.name) == name) {
+                jvmNameEntry?.delete()
+                continue
+            }
+
             if (jvmNameEntry == null) {
-                if (name == PackagePartClassUtils.getFilePartShortName(file.name)) continue
+                val newFileName = PackagePartClassUtils.getFileNameByFacadeName(name)
+                val facadeDir = file.parent
+                if (newFileName != null && facadeDir != null && facadeDir.findFile(newFileName) == null) {
+                    file.name = newFileName
+                    continue
+                }
 
                 val psiFactory = KtPsiFactory(this)
                 val annotationText = "${JvmFileClassUtil.JVM_NAME_SHORT}(\"$name\")"
+                val newFileAnnotationList = psiFactory.createFileAnnotationListWithAnnotation(annotationText)
                 val annotationList = file.fileAnnotationList
                 if (annotationList != null) {
-                    annotationList.add(psiFactory.createAnnotationEntry("@file:$annotationText"))
+                    annotationList.add(newFileAnnotationList.annotationEntries.first())
                 }
                 else {
-                    file.addAfter(psiFactory.createFileAnnotationListWithAnnotation(annotationText), null)
+                    val anchor = file.firstChild.siblings().firstOrNull { it !is PsiWhiteSpace && it !is PsiComment }
+                    file.addBefore(newFileAnnotationList, anchor)
                 }
                 continue
             }

@@ -38,14 +38,14 @@ import org.jetbrains.kotlin.resolve.DescriptorUtils
 import org.jetbrains.kotlin.resolve.lazy.BodyResolveMode
 
 class RenameJvmNameHandler : PsiElementRenameHandler() {
-    private fun getElementAtCaret(dataContext: DataContext): PsiElement? {
+    private fun getStringTemplate(dataContext: DataContext): KtStringTemplateExpression? {
         val caret = CommonDataKeys.CARET.getData(dataContext) ?: return null
         val ktFile = CommonDataKeys.PSI_FILE.getData(dataContext) as? KtFile ?: return null
-        return ktFile.findElementAt(caret.offset)
+        return ktFile.findElementAt(caret.offset)?.getNonStrictParentOfType<KtStringTemplateExpression>()
     }
 
     override fun isAvailableOnDataContext(dataContext: DataContext): Boolean {
-        val nameExpression = getElementAtCaret(dataContext)?.getNonStrictParentOfType<KtStringTemplateExpression>() ?: return false
+        val nameExpression = getStringTemplate(dataContext) ?: return false
         if (!nameExpression.isPlain()) return false
         val entry = ((nameExpression.parent as? KtValueArgument)?.parent as? KtValueArgumentList)?.parent as? KtAnnotationEntry
                     ?: return false
@@ -55,7 +55,7 @@ class RenameJvmNameHandler : PsiElementRenameHandler() {
     }
 
     private fun wrapDataContext(dataContext: DataContext): DataContext? {
-        val nameExpression = getElementAtCaret(dataContext)?.getNonStrictParentOfType<KtStringTemplateExpression>() ?: return null
+        val nameExpression = getStringTemplate(dataContext) ?: return null
         val name = nameExpression.plainContent
         val entry = nameExpression.getStrictParentOfType<KtAnnotationEntry>() ?: return null
         val annotationList = PsiTreeUtil.getParentOfType(entry, KtModifierList::class.java, KtFileAnnotationList::class.java)
@@ -65,7 +65,7 @@ class RenameJvmNameHandler : PsiElementRenameHandler() {
 
             is KtFileAnnotationList -> annotationList.getContainingKtFile().findFacadeClass() ?: return null
 
-            else -> null
+            else -> return null
         }
         return DataContext { id ->
             if (CommonDataKeys.PSI_ELEMENT.`is`(id)) return@DataContext newElement

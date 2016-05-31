@@ -35,12 +35,12 @@ class RenameKotlinClassProcessor : RenameKotlinPsiProcessor() {
         return element is KtClassOrObject || element is KtLightClass || element is KtConstructor<*>
     }
 
-    override fun substituteElementToRename(element: PsiElement, editor: Editor?) = getKtClassOrObject(element)
+    override fun substituteElementToRename(element: PsiElement, editor: Editor?) = getClassOrObject(element)
 
     override fun prepareRenaming(element: PsiElement, newName: String, allRenames: MutableMap<PsiElement, String>) {
         super.prepareRenaming(element, newName, allRenames)
 
-        val classOrObject = getKtClassOrObject(element) as? KtClassOrObject ?: return
+        val classOrObject = getClassOrObject(element) as? KtClassOrObject ?: return
 
         val file = classOrObject.getContainingKtFile()
 
@@ -68,7 +68,7 @@ class RenameKotlinClassProcessor : RenameKotlinPsiProcessor() {
         return bindingContext[BindingContext.SHORT_REFERENCE_TO_COMPANION_OBJECT, element] != null
     }
 
-    private fun getKtClassOrObject(element: PsiElement?): PsiElement? = when (element) {
+    private fun getClassOrObject(element: PsiElement?): PsiElement? = when (element) {
         is KtLightClass ->
             when (element) {
                 is KtLightClassForExplicitDeclaration -> element.kotlinOrigin

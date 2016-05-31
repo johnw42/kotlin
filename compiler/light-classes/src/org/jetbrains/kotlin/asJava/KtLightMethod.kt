@@ -101,13 +101,18 @@ sealed class KtLightMethodImpl(
 
     override fun setName(name: String): PsiElement? {
         val jvmNameAnnotation = modifierList.findAnnotation(DescriptorUtils.JVM_NAME.asString())
+        val newNameForOrigin = propertyNameByAccessor(name, this) ?: name
+        if (newNameForOrigin == kotlinOrigin?.name) {
+            jvmNameAnnotation?.delete()
+            return this
+        }
         val nameExpression = jvmNameAnnotation?.findAttributeValue("name")?.unwrapped as? KtStringTemplateExpression
         if (nameExpression != null) {
             nameExpression.replace(KtPsiFactory(this).createStringTemplate(name))
         }
         else {
             val toRename = kotlinOrigin as? PsiNamedElement ?: throwCanNotModify()
-            toRename.setName(propertyNameByAccessor(name, this) ?: name)
+            toRename.setName(newNameForOrigin)
         }
         return this
     }
